@@ -1,0 +1,4 @@
+numpy>=2.0
+matplotlib>=3.7
+# Studio (Arms B/C acceleration) — install on the Mac Studio:
+# jax  (Metal:  pip install jax-metal ; or CPU/CUDA per platform)
