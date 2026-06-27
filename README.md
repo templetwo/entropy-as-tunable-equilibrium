@@ -33,7 +33,8 @@ A particle in a potential landscape under overdamped Langevin dynamics, two cond
 | **Arm B** | 2D chamber–channel–chamber, sharp τ\* crossover | ✅ **horizon knob confirmed** — engine P_L 0.51 → 0.91 monotone vs flat control 0.371 |
 | **Arm C** | τ\* tracks geometry (`τ\* ∝ L_ch²/D`) — the make-or-break test | ❌ **FALSIFIED** — τ\* is flat in L_ch (R²ₒᵣᵢgᵢₙ = −17.7). A D-scan shows τ\* ∝ 1/D (R²=0.97): τ\* is a diffusive geometric time set by **chamber** exploration (r_L), not **channel** length. See `RESULTS.md`. |
 | **v2** | First-passage discriminator (kinetic) | ✅ **thesis demonstrated** — MFPT ∝ sep²/D (R²=0.992) recovers the corridor signature occupancy is blind to; current test ⟨L_z⟩≈0 for the conservative engine. Engine vs readout: thermodynamically indistinguishable, kinetically distinguishable. |
-| Arm D | Free Energy Principle (dual engine) | 🔜 future |
+| **v3** | Engine-driven first-passage: does the τ-knob leave a fingerprint *no static U can mimic?* | ➖ **honest negative (conservative 1D)** — the τ-knob is a real FPT dial (MFPT 13.9→6.1 vs τ), but at each τ it *is* equilibrium relaxation in U_eff(τ) = −T_c S_c (definitional once Arm A holds; 1D is curl-free). Driven scaling α≈1 (drift, not diffusive α=2); ⟨L_z⟩≈0 re-confirms equivalence. No irreducible fingerprint here. Production figures + manifest under `figures/fig*`, `results/v3_manifest.json`. |
+| Arm D / v4 | Non-conservative force (2D+, curl ≠ 0) — where a non-vacuous irreducibility test exists | 🔜 frontier |
 
 > **Outcome (see [RESULTS.md](RESULTS.md)).** The horizon knob is real (Phase 0, Arm B) and
 > the engine's organization obeys a genuine diffusive law (τ\* ∝ 1/D). The steady-state
@@ -43,8 +44,12 @@ A particle in a potential landscape under overdamped Langevin dynamics, two cond
 > R²=0.992) while occupancy stays flat and the conservative engine force shows **zero probability
 > current** (⟨L_z⟩≈0 vs a rotational positive control). The sharp, defensible thesis: **engine and
 > readout entropy can be thermodynamically indistinguishable (identical occupancy, zero current)
-> yet kinetically distinguishable (first-passage under the τ-knob).** Prior-art context and honest
-> novelty accounting: [docs/PRIOR_ART_AND_NOVELTY.md](docs/PRIOR_ART_AND_NOVELTY.md).
+> yet kinetically distinguishable (first-passage under the τ-knob).** **v3 closes the loop
+> honestly:** engine-driven first-passage *is* a real τ-dial, but in the conservative 1D regime
+> that dial is equilibrium relaxation in a τ-tunable U_eff(τ) (driven α≈1, zero current) — there is
+> *no* fingerprint a static potential cannot mimic. The genuine non-equilibrium frontier is **v4**
+> (a non-conservative force, 2D+, where curl and steady currents become possible). Prior-art context
+> and honest novelty accounting: [docs/PRIOR_ART_AND_NOVELTY.md](docs/PRIOR_ART_AND_NOVELTY.md).
 
 ### Phase 0 result
 
