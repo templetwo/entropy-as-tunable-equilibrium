@@ -68,6 +68,31 @@ The arrow of time *is* entropy increase, so "is entropy fundamental?" and "is ti
 
 Full experimental specification, parameters, success/falsification criteria, and executor instructions: **[SPEC.md](SPEC.md)**.
 
+## Related work & honest novelty
+
+A prior-art and novelty assessment is in **[docs/PRIOR_ART_AND_NOVELTY.md](docs/PRIOR_ART_AND_NOVELTY.md)**.
+Short version of where this sits in the literature:
+
+- **The mechanism is not new.** The causal entropic force (Wissner-Gross & Freer, *PRL* 2013)
+  and its option-rich-preference behavior are established, and the "is this just reward
+  shaping?" worry is the consensus view: causal-entropic forcing is mathematically an
+  *entropy-of-futures intrinsic reward* (Shah 2014; Ramírez-Ruiz et al., *Nat. Commun.* 2024,
+  "Maximum Occupancy Principle"). S_c is best framed as a **Maximum-Caliber path entropy**
+  (Pressé et al. 2013; Ghosh et al. 2020).
+- **The v1 Arm C failure is textbook, and that's the point.** That a *steady-state*
+  occupancy can't see channel-traversal time is the detailed-balance / thermodynamics–kinetics
+  separation: equilibrium ∝ exp(−βU_eff) is provably blind to barriers and path lengths, which
+  live only in *kinetic* observables (Hänggi–Talkner–Borkovec, *RMP* 1990; Gardiner; van Kampen).
+  The expected `L²/D` scaling is canonical diffusive first-passage — it appears in the **MFPT**,
+  not in occupancy.
+- **The genuinely defensible contribution** is the experimental epistemology: the **τ horizon
+  knob** as a controlled dial, the **engine-vs-readout** framing as a testable question, and a
+  *pre-registered prediction that failed for a principled reason* with a correct diagnosis. The
+  sharpest honest thesis: in the conservative, position-only overdamped regime, "engine entropy"
+  has zero steady-state current / zero entropy production — it is **thermodynamically
+  indistinguishable** from equilibrium relaxation and distinguishable, if at all, only
+  **kinetically**. That is what the v2 first-passage discriminator is built to test.
+
 ## Provenance
 
 Part of [The Temple of Two](https://thetempleoftwo.com) · [github.com/templetwo](https://github.com/templetwo). Designed collaboratively by Anthony Vasquez and Claude. Background research chain and persistent record live in the Sovereign Stack (entropy-as-substrate thread).

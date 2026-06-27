@@ -109,6 +109,34 @@ scale as **1/D**.
   gated and would scale as L_ch²/D if the engine claim holds. Steady-state P_L cannot probe
   it; this is a metric limitation, not (yet) a refutation of the engine.
 
+## Prior art & how to read this result  (see `docs/PRIOR_ART_AND_NOVELTY.md`)
+The Arm C negative is **not a surprising bug — it is a rediscovery of a foundational result**,
+and that framing is the honest one:
+- **Why Arm C *had* to fail with a steady-state metric.** Under detailed balance the stationary
+  occupancy is ∝ exp(−βU_eff) with `U_eff = −T_c S_c`; it depends only on per-site free energies
+  and is **provably blind** to barriers and inter-site path lengths. Channel-traversal time
+  `L_ch²/D` is a *kinetic* quantity that lives only in dynamical observables (rates, MFPT). This
+  is the thermodynamics–kinetics separation: Hänggi–Talkner–Borkovec, *Rev. Mod. Phys.* 62 (1990);
+  Gardiner; van Kampen. The `L²/D` scaling is canonical diffusive first-passage and *will* show up
+  in the MFPT — just not in occupancy.
+- **The deepest tension (states it plainly).** Arm A found the position-only overdamped causal
+  force is **conservative** → its steady state is an equilibrium-like Boltzmann form with **zero
+  probability current and zero entropy production**. So in this regime "engine entropy" is
+  **thermodynamically indistinguishable** from a readout relaxation to `U_eff`; the τ-dependence of
+  `U_eff` is the *only* thing separating them. That is exactly why the **τ knob** (not a
+  current/entropy-production measure) is the distinguishing probe here, and why the discriminator
+  must be **kinetic**.
+- **The "disguised reward" objection is the consensus view, not a flaw to hide.** Causal-entropic
+  forcing is mathematically an entropy-of-futures intrinsic reward (Shah 2014; Ramírez-Ruiz et al.,
+  *Nat. Commun.* 2024, Maximum Occupancy Principle); S_c is a Maximum-Caliber path entropy (Pressé
+  et al. 2013). The contribution is the *experimental epistemology*: the τ probe, the engine-vs-readout
+  framing, and a pre-registered prediction that failed for a principled, diagnosed reason.
+- **Sharpest honest thesis for v2:** engine and readout entropy can be *thermodynamically
+  indistinguishable* (identical occupancy, zero current) yet *kinetically distinguishable* (different
+  first-passage signatures under the τ-knob). v2 = MFPT **and its fluctuations** (TUR: Gingrich–Horowitz
+  2017) between chambers vs `L_ch`, plus a direct broken-detailed-balance / probability-current test
+  (Battle–Broedersz, *Science* 2016) — predicted null here, which would itself be a clean result.
+
 ## Honest caveats
 - Ran on the MacBook (NumPy fallback), not the Studio (JAX). The 2D engine is
   oracle-validated against the reference (corr 0.993, relL2 0.005), but the absolute S_c
