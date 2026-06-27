@@ -215,3 +215,20 @@ first-passage fingerprint no static U(x) can mimic — needs engine-*driven* fir
   own falsifier clause ("a negative result here is a real, publishable outcome — do not tune
   it away"). The chamber tuning that flipped thermal to favor the small well is legitimate
   setup (it changes the *control*, not τ*); τ* itself was never tuned.
+
+## v3 — Production confirmation (honest negative in conservative 1D)
+
+Re-ran against real `src/landscape_v2.py:Corridor1D` + `causal_entropy` (committed generator `src/v3_produce.py`, no sandbox reconstruction).
+
+- Production manifest: `results/v3_manifest.json` (8000 traj/cell main, 8000 for scaling; 9 log τ × 9 sep; seed 42; wall ~minutes on M3 Pro after increases for better-conditioned α fit).
+- MFPT(τ) is a monotone kinetic dial: distributions slide left and sharpen as horizon grows (real measurement).
+- Reducibility to static U_eff(τ) = −βT_c S_c(τ) is a *definitional* consequence of Arm A (F_ce is conservative). In 1D every force is curl-free; running the identical SDE twice and KS-testing is circular and was removed. No such p-values are presented as findings.
+- Scaling: measured α(τ) ≈ 0.7–1.1 (drift/ballistic under the driven force). This is *not* thermal diffusive sep²/D (α=2 from v2). α≈1 is generic for drift; it does not by itself separate the entropic engine from a disguised reward. Fig 4 and docs corrected.
+- Current (the real empirical anchor): engine ⟨L_z⟩ ≈ 0 (CI crosses zero); Rotor2D ω=0.5 control shows nonzero current + directional FPT asymmetry (p ≈ 2.5e-5).
+- Seven publication figures by pure loader `src/v3_figures.py` (no random, no literals). Generator committed.
+- Honest outcome: in this conservative 1D regime the engine is thermodynamically indistinguishable from equilibrium relaxation in a τ-tunable U_eff(τ). The τ-knob produces a visible dial in kinetics, but that dial is equilibrium dynamics in the effective potential. The negative ("no fingerprint that no static potential can mimic") is the result. It correctly names the frontier as v4 (non-conservative force, 2D+, curl ≠ 0, where a non-circular test becomes possible).
+
+v3 re-confirms the core thermodynamic finding of v2 rather than advancing past it. All artifacts on `v3-confirmation`; human reviews and pushes.
+
+Figures + manifest (and producer) staged on `v3-confirmation` for human review/push.
+
