@@ -2,11 +2,13 @@
 """
 v3_figures.py
 =============
-PURE LOADER. Reads results/v3_manifest.json and renders exactly seven publication-grade
-figures (PNG + PDF @ 300 dpi). 
+PURE LOADER. Reads results/v3_manifest.json (and results/v2_firstpassage.npz for the
+v1/v2 context panel in fig7) and renders exactly seven publication-grade figures
+(PNG + PDF @ 300 dpi).
 
 - Zero np.random anywhere.
-- Zero hardcoded data literals; every plotted value comes from the manifest.
+- Zero hardcoded data literals; every plotted value comes from a committed artifact
+  (the v3 manifest, or the v2 npz for fig7's prior-stage panel).
 - Each figure is self-contained (title, units, legend).
 - tau rendered with perceptual gradient (viridis).
 - Fails loudly on missing keys or shape mismatch.
@@ -318,14 +320,21 @@ def fig7_arc(d):
     fig = plt.figure(figsize=(11, 7.5))
     gs = fig.add_gridspec(2, 2, hspace=0.32, wspace=0.25)
 
-    # v1: occupancy (conceptual from prior results)
+    # v1/v2 occupancy panel — loaded from the committed v2 artifact (not literals)
+    v2_path = "results/v2_firstpassage.npz"
+    if not os.path.exists(v2_path):
+        raise FileNotFoundError(f"Missing {v2_path}. fig7's v1/v2 panel reads it (run v2 first).")
+    v2 = np.load(v2_path, allow_pickle=True)
+    v2rows = json.loads(str(v2["rows"]))
+    v2_seps = [r["sep"] for r in v2rows]
+    v2_thermal = [r["thermal_PR"] for r in v2rows]
+    v2_engine = [r["engine_PR"] for r in v2rows]
     ax0 = fig.add_subplot(gs[0, 0])
-    ax0.text(0.5, 0.7, "v1 / Arm C\noccupancy (P_R) vs sep", ha="center", fontsize=11, transform=ax0.transAxes)
-    ax0.plot([4, 5, 6, 7, 8], [0.48, 0.49, 0.50, 0.51, 0.51], "o--", color="#1f6feb", label="thermal (flat)")
-    ax0.plot([4, 5, 6, 7, 8], [0.78, 0.71, 0.67, 0.63, 0.60], "s-", color="#cc3a21", label="engine (S_c geometry)")
+    ax0.plot(v2_seps, v2_thermal, "o--", color="#1f6feb", label="thermal (flat)")
+    ax0.plot(v2_seps, v2_engine, "s-", color="#cc3a21", label="engine (S_c geometry)")
     ax0.set_xlabel("sep")
     ax0.set_ylabel("P (right basin)")
-    ax0.set_title("v1: occupancy blind to L (detailed balance)\n(thermal flat; engine sees options but not sep²/D)")
+    ax0.set_title("v1/v2: occupancy blind to L (detailed balance)\n(thermal flat; engine sees options but not sep²/D)")
     ax0.legend(fontsize=8)
     ax0.set_ylim(0.3, 0.9)
 
