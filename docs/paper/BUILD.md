@@ -1,4 +1,4 @@
-# Paper build — `entropy-as-engine`
+# Paper build — `entropy-as-tunable-equilibrium`
 
 This directory holds the manuscript for the v3 result:
 **"Entropy as a Tunable Equilibrium, Not an Engine."**

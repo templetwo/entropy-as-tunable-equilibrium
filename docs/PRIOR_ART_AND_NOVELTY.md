@@ -1,4 +1,4 @@
-# Prior Art and Current Research: Entropy as Engine
+# Prior Art and Current Research: Entropy as a Tunable Equilibrium
 
 ## Executive Summary — “Are We Reinventing the Wheel?”
 

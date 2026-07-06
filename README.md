@@ -1,13 +1,13 @@
-# Entropy as Engine
+# Entropy as a Tunable Equilibrium
 
-**Can entropy drive a system, or only describe one?**
+**Can entropy drive a system, or only describe one? It can look like it does — and still just be describing one, tuned by how far ahead you let it see.**
 
-This repo runs a single falsifiable experiment to tell two views of entropy apart:
+This repo ran a single falsifiable experiment to tell two views of entropy apart, and got a clean, unexpected answer: not the engine it set out to find, but something stranger — a state that *organizes itself* purely by adjusting its own horizon, while remaining, thermodynamically, at rest. The horizon knob is real. The engine isn't, not in the regime tested. Both halves of that sentence are the discovery.
 
 - **Readout entropy** — entropy is a thermometer. A system maximizes its own entropy by relaxing to equilibrium, and stops. The steady state is fixed (the Boltzmann distribution). There is no knob you can push.
 - **Engine entropy** — entropy is a prime mover. Using the *causal entropic force* (Wissner-Gross & Freer, *PRL* 2013), a future-entropy gradient drives a system into organized, anticipatory behavior with **no reward function**.
 
-The two are separable by one device: a **horizon knob** τ. If you can change how a system organizes itself purely by changing how far ahead it looks, entropy is doing work, not just being measured. Thermal relaxation has no τ. The causal entropic force does.
+The two are separable by one device: a **horizon knob** τ. If you can change how a system organizes itself purely by changing how far ahead it looks, entropy is doing work, not just being measured. Thermal relaxation has no τ. The causal entropic force does — **but doing work and being an engine turn out not to be the same claim.** The knob is real, and turning it *is* thermodynamic relaxation, into a τ-shaped equilibrium that moves as τ moves. Structure without a motor. That's the tunable equilibrium the title names.
 
 ## The minimal prediction
 
@@ -105,6 +105,8 @@ Short version of where this sits in the literature:
 ## Provenance
 
 Part of [The Temple of Two](https://thetempleoftwo.com) · [github.com/templetwo](https://github.com/templetwo). Designed collaboratively by Anthony Vasquez and Claude. Background research chain and persistent record live in the Sovereign Stack (entropy-as-substrate thread).
+
+The v3 manuscript is staged for Zenodo: **DOI [10.5281/zenodo.21223845](https://doi.org/10.5281/zenodo.21223845)** (reserved; publication pending).
 
 ## License
 

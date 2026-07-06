@@ -1,4 +1,4 @@
-# Zenodo deposition — entropy-as-engine v3
+# Zenodo deposition — entropy-as-tunable-equilibrium v3
 
 Paste-ready metadata for the Zenodo upload form. Mirrors the provenance style
 of the prior Temple of Two depositions (human + AI co-authorship, honest
@@ -86,8 +86,8 @@ falsifiable negative; multi-agent verification; Langevin dynamics
 
 ## Related identifiers
 
-- *is supplemented by* (Software): `https://github.com/templetwo/entropy-as-engine`
-  (commit 3191138, Apache-2.0)
+- *is supplemented by* (Software): `https://github.com/templetwo/entropy-as-tunable-equilibrium`
+  (commit b999029, Apache-2.0)
 - *is part of* — your Temple of Two DOI provenance chain (cross-link the prior
   related depositions here as you did for the Mitochondrial Disclosure Surface
   and Phenomenological Compass depositions).
