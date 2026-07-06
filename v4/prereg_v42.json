@@ -1,0 +1,302 @@
+{
+  "type": "preregistration",
+  "source_sha_at_registration": "cf96923bba3e941c",
+  "version": "v4h-1.2.0",
+  "config_hash": "35e4ad5430ac4ff7",
+  "config": {
+    "version": "v4h-1.2.0",
+    "box": {
+      "Lx": 4.0,
+      "Ly": 2.0,
+      "wall_t": 0.3,
+      "ch_w_default": 0.4
+    },
+    "bath": {
+      "D": 1.0,
+      "gamma": 1.0
+    },
+    "dyn": {
+      "dt": 0.01,
+      "n_force_cache": 20
+    },
+    "entropy": {
+      "estimator": "ENDPOINT_ENTROPY",
+      "dt_path": 0.04,
+      "h_ent": 0.2,
+      "delta_fd": 0.1,
+      "M_online": 96,
+      "M_grid": 400,
+      "Tc": 1.0,
+      "grid_nx": 40,
+      "grid_ny": 20
+    },
+    "fpt": {
+      "start_frac": [
+        0.25,
+        0.5
+      ],
+      "target_margin": 0.2,
+      "K_target": 50,
+      "T_max": 2500.0,
+      "hist_edges_log10": [
+        -0.5,
+        3.0,
+        24
+      ]
+    },
+    "current": {
+      "cells_x": 24,
+      "cells_y": 12
+    },
+    "occupancy": {
+      "bins_x": 24
+    },
+    "gyrator": {
+      "k": 1.0,
+      "u": 0.6,
+      "dt": 0.001,
+      "T_total": 2000.0,
+      "hot": {
+        "Tx": 4.0,
+        "Ty": 1.0
+      },
+      "ctrl": {
+        "Tx": 2.5,
+        "Ty": 2.5
+      },
+      "cells": 12,
+      "extent": 4.0
+    },
+    "sweeps": {
+      "matched_tau": 0.25,
+      "matched_M": 256,
+      "matched_blocks": 16,
+      "m_sweep": [
+        64,
+        128
+      ],
+      "sweep_blocks": 8,
+      "cache_ctrl": 20,
+      "ctrl_blocks": 8,
+      "grid_ctrl_M": 96,
+      "K_powered": 100,
+      "K_small": 50,
+      "c3_channel_lengths": [
+        0.15,
+        0.3,
+        0.6,
+        1.2
+      ],
+      "c3_tau": 1.0,
+      "c3_blocks": 4,
+      "c4v_kappas": [
+        0.0,
+        2.0,
+        4.0,
+        8.0
+      ],
+      "c4v_blocks": 16,
+      "c4v_tau": 1.0,
+      "c0_blocks": [
+        "sb0",
+        "sb1",
+        "sb2",
+        "sb3"
+      ]
+    },
+    "thresholds": {
+      "ks_alpha": 0.01,
+      "occ_gate_min_p": 0.05,
+      "quad_z": 3.0,
+      "sign_consistency": 12,
+      "kramers_slope": [
+        1.7,
+        2.3
+      ],
+      "vortex_alpha": 0.01,
+      "rough_alpha": 0.01,
+      "n_perm": 20000
+    },
+    "vortex": {
+      "center": [
+        2.0,
+        1.0
+      ],
+      "sigma": [
+        0.4,
+        0.3
+      ]
+    },
+    "roi": {
+      "center": [
+        2.0,
+        1.0
+      ],
+      "half": [
+        0.45,
+        0.45
+      ],
+      "cells": 6
+    }
+  },
+  "units": [
+    "C0_hot_sb0",
+    "C0_hot_sb1",
+    "C0_hot_sb2",
+    "C0_hot_sb3",
+    "C0_ctrl_sb0",
+    "C0_ctrl_sb1",
+    "C0_ctrl_sb2",
+    "C0_ctrl_sb3",
+    "C1m_frozen_M256_tau0.25_sb0",
+    "C1m_frozen_M256_tau0.25_sb1",
+    "C1m_frozen_M256_tau0.25_sb2",
+    "C1m_frozen_M256_tau0.25_sb3",
+    "C1m_frozen_M256_tau0.25_sb4",
+    "C1m_frozen_M256_tau0.25_sb5",
+    "C1m_frozen_M256_tau0.25_sb6",
+    "C1m_frozen_M256_tau0.25_sb7",
+    "C1m_frozen_M256_tau0.25_sb8",
+    "C1m_frozen_M256_tau0.25_sb9",
+    "C1m_frozen_M256_tau0.25_sb10",
+    "C1m_frozen_M256_tau0.25_sb11",
+    "C1m_frozen_M256_tau0.25_sb12",
+    "C1m_frozen_M256_tau0.25_sb13",
+    "C1m_frozen_M256_tau0.25_sb14",
+    "C1m_frozen_M256_tau0.25_sb15",
+    "C1m_online_M256_c1_tau0.25_sb0",
+    "C1m_online_M256_c1_tau0.25_sb1",
+    "C1m_online_M256_c1_tau0.25_sb2",
+    "C1m_online_M256_c1_tau0.25_sb3",
+    "C1m_online_M256_c1_tau0.25_sb4",
+    "C1m_online_M256_c1_tau0.25_sb5",
+    "C1m_online_M256_c1_tau0.25_sb6",
+    "C1m_online_M256_c1_tau0.25_sb7",
+    "C1m_online_M256_c1_tau0.25_sb8",
+    "C1m_online_M256_c1_tau0.25_sb9",
+    "C1m_online_M256_c1_tau0.25_sb10",
+    "C1m_online_M256_c1_tau0.25_sb11",
+    "C1m_online_M256_c1_tau0.25_sb12",
+    "C1m_online_M256_c1_tau0.25_sb13",
+    "C1m_online_M256_c1_tau0.25_sb14",
+    "C1m_online_M256_c1_tau0.25_sb15",
+    "C1s_online_M64_c1_tau0.25_sb0",
+    "C1s_online_M64_c1_tau0.25_sb1",
+    "C1s_online_M64_c1_tau0.25_sb2",
+    "C1s_online_M64_c1_tau0.25_sb3",
+    "C1s_online_M64_c1_tau0.25_sb4",
+    "C1s_online_M64_c1_tau0.25_sb5",
+    "C1s_online_M64_c1_tau0.25_sb6",
+    "C1s_online_M64_c1_tau0.25_sb7",
+    "C1s_online_M128_c1_tau0.25_sb0",
+    "C1s_online_M128_c1_tau0.25_sb1",
+    "C1s_online_M128_c1_tau0.25_sb2",
+    "C1s_online_M128_c1_tau0.25_sb3",
+    "C1s_online_M128_c1_tau0.25_sb4",
+    "C1s_online_M128_c1_tau0.25_sb5",
+    "C1s_online_M128_c1_tau0.25_sb6",
+    "C1s_online_M128_c1_tau0.25_sb7",
+    "C1c_online_M256_c20_tau0.25_sb0",
+    "C1c_online_M256_c20_tau0.25_sb1",
+    "C1c_online_M256_c20_tau0.25_sb2",
+    "C1c_online_M256_c20_tau0.25_sb3",
+    "C1c_online_M256_c20_tau0.25_sb4",
+    "C1c_online_M256_c20_tau0.25_sb5",
+    "C1c_online_M256_c20_tau0.25_sb6",
+    "C1c_online_M256_c20_tau0.25_sb7",
+    "C1g_frozen_M96_tau0.25_sb0",
+    "C1g_frozen_M96_tau0.25_sb1",
+    "C1g_frozen_M96_tau0.25_sb2",
+    "C1g_frozen_M96_tau0.25_sb3",
+    "C1g_frozen_M96_tau0.25_sb4",
+    "C1g_frozen_M96_tau0.25_sb5",
+    "C1g_frozen_M96_tau0.25_sb6",
+    "C1g_frozen_M96_tau0.25_sb7",
+    "C3e_frozen_L0.15_tau1.0_sb0",
+    "C3e_frozen_L0.15_tau1.0_sb1",
+    "C3e_frozen_L0.15_tau1.0_sb2",
+    "C3e_frozen_L0.15_tau1.0_sb3",
+    "C3e_frozen_L0.3_tau1.0_sb0",
+    "C3e_frozen_L0.3_tau1.0_sb1",
+    "C3e_frozen_L0.3_tau1.0_sb2",
+    "C3e_frozen_L0.3_tau1.0_sb3",
+    "C3e_frozen_L0.6_tau1.0_sb0",
+    "C3e_frozen_L0.6_tau1.0_sb1",
+    "C3e_frozen_L0.6_tau1.0_sb2",
+    "C3e_frozen_L0.6_tau1.0_sb3",
+    "C3e_frozen_L1.2_tau1.0_sb0",
+    "C3e_frozen_L1.2_tau1.0_sb1",
+    "C3e_frozen_L1.2_tau1.0_sb2",
+    "C3e_frozen_L1.2_tau1.0_sb3",
+    "C4v_frozen_k0.0_tau1.0_sb0",
+    "C4v_frozen_k0.0_tau1.0_sb1",
+    "C4v_frozen_k0.0_tau1.0_sb2",
+    "C4v_frozen_k0.0_tau1.0_sb3",
+    "C4v_frozen_k0.0_tau1.0_sb4",
+    "C4v_frozen_k0.0_tau1.0_sb5",
+    "C4v_frozen_k0.0_tau1.0_sb6",
+    "C4v_frozen_k0.0_tau1.0_sb7",
+    "C4v_frozen_k0.0_tau1.0_sb8",
+    "C4v_frozen_k0.0_tau1.0_sb9",
+    "C4v_frozen_k0.0_tau1.0_sb10",
+    "C4v_frozen_k0.0_tau1.0_sb11",
+    "C4v_frozen_k0.0_tau1.0_sb12",
+    "C4v_frozen_k0.0_tau1.0_sb13",
+    "C4v_frozen_k0.0_tau1.0_sb14",
+    "C4v_frozen_k0.0_tau1.0_sb15",
+    "C4v_frozen_k2.0_tau1.0_sb0",
+    "C4v_frozen_k2.0_tau1.0_sb1",
+    "C4v_frozen_k2.0_tau1.0_sb2",
+    "C4v_frozen_k2.0_tau1.0_sb3",
+    "C4v_frozen_k2.0_tau1.0_sb4",
+    "C4v_frozen_k2.0_tau1.0_sb5",
+    "C4v_frozen_k2.0_tau1.0_sb6",
+    "C4v_frozen_k2.0_tau1.0_sb7",
+    "C4v_frozen_k2.0_tau1.0_sb8",
+    "C4v_frozen_k2.0_tau1.0_sb9",
+    "C4v_frozen_k2.0_tau1.0_sb10",
+    "C4v_frozen_k2.0_tau1.0_sb11",
+    "C4v_frozen_k2.0_tau1.0_sb12",
+    "C4v_frozen_k2.0_tau1.0_sb13",
+    "C4v_frozen_k2.0_tau1.0_sb14",
+    "C4v_frozen_k2.0_tau1.0_sb15",
+    "C4v_frozen_k4.0_tau1.0_sb0",
+    "C4v_frozen_k4.0_tau1.0_sb1",
+    "C4v_frozen_k4.0_tau1.0_sb2",
+    "C4v_frozen_k4.0_tau1.0_sb3",
+    "C4v_frozen_k4.0_tau1.0_sb4",
+    "C4v_frozen_k4.0_tau1.0_sb5",
+    "C4v_frozen_k4.0_tau1.0_sb6",
+    "C4v_frozen_k4.0_tau1.0_sb7",
+    "C4v_frozen_k4.0_tau1.0_sb8",
+    "C4v_frozen_k4.0_tau1.0_sb9",
+    "C4v_frozen_k4.0_tau1.0_sb10",
+    "C4v_frozen_k4.0_tau1.0_sb11",
+    "C4v_frozen_k4.0_tau1.0_sb12",
+    "C4v_frozen_k4.0_tau1.0_sb13",
+    "C4v_frozen_k4.0_tau1.0_sb14",
+    "C4v_frozen_k4.0_tau1.0_sb15",
+    "C4v_frozen_k8.0_tau1.0_sb0",
+    "C4v_frozen_k8.0_tau1.0_sb1",
+    "C4v_frozen_k8.0_tau1.0_sb2",
+    "C4v_frozen_k8.0_tau1.0_sb3",
+    "C4v_frozen_k8.0_tau1.0_sb4",
+    "C4v_frozen_k8.0_tau1.0_sb5",
+    "C4v_frozen_k8.0_tau1.0_sb6",
+    "C4v_frozen_k8.0_tau1.0_sb7",
+    "C4v_frozen_k8.0_tau1.0_sb8",
+    "C4v_frozen_k8.0_tau1.0_sb9",
+    "C4v_frozen_k8.0_tau1.0_sb10",
+    "C4v_frozen_k8.0_tau1.0_sb11",
+    "C4v_frozen_k8.0_tau1.0_sb12",
+    "C4v_frozen_k8.0_tau1.0_sb13",
+    "C4v_frozen_k8.0_tau1.0_sb14",
+    "C4v_frozen_k8.0_tau1.0_sb15"
+  ],
+  "outcome_map": [
+    "(a) FPT signature + occupancy match",
+    "(b) online current z>=3 with C0 calibrated",
+    "(c) both null + Kramers slope in band",
+    "(d) C4 bias-monotone current z>=3"
+  ]
+}

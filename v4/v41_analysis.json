@@ -1,0 +1,119 @@
+{
+  "n_results": 168,
+  "config_hash": "c439a2ba2eb1c1bd",
+  "config_match": true,
+  "C0": {
+    "hot_absL": 1.7666074747936615,
+    "ctrl_absL": 0.1376268796872563,
+    "pass": true
+  },
+  "C1": {
+    "0.25": {
+      "ks": 0.0519,
+      "p": 0.0005,
+      "median_shift": 0.3999999999999999,
+      "occ_chi2": 0.00131
+    },
+    "0.5": {
+      "ks": 0.0614,
+      "p": 0.0005,
+      "median_shift": 0.5099999999999998,
+      "occ_chi2": 0.00094
+    },
+    "1.0": {
+      "ks": 0.065,
+      "p": 0.0605,
+      "median_shift": 0.565,
+      "occ_chi2": 0.00114
+    },
+    "2.0": {
+      "ks": 0.0463,
+      "p": 0.3458,
+      "median_shift": 0.1200000000000001,
+      "occ_chi2": 0.00022
+    }
+  },
+  "fork_a_fpt_signature": true,
+  "C2": {
+    "0.25": {
+      "online_mean_rate": 3.2400399352312587e-06,
+      "frozen_mean_rate": -0.00012158948587609792,
+      "z": 1.9746084823072039,
+      "sign_consistency": 9,
+      "n_blocks": 16,
+      "dominant_sign": -1
+    },
+    "0.5": {
+      "online_mean_rate": -1.93081626349394e-05,
+      "frozen_mean_rate": -1.226643287440065e-05,
+      "z": -0.1675993968791597,
+      "sign_consistency": 8,
+      "n_blocks": 16,
+      "dominant_sign": 1
+    },
+    "1.0": {
+      "online_mean_rate": -0.00011671996039240427,
+      "frozen_mean_rate": 0.0002440001785743406,
+      "z": -3.256235447380007,
+      "sign_consistency": 9,
+      "n_blocks": 16,
+      "dominant_sign": -1
+    },
+    "2.0": {
+      "online_mean_rate": 1.966450691169811e-05,
+      "frozen_mean_rate": -5.108069151804151e-05,
+      "z": 0.601544817451015,
+      "sign_consistency": 8,
+      "n_blocks": 16,
+      "dominant_sign": 1
+    }
+  },
+  "fork_b_current": false,
+  "fork_b_detail": {
+    "triggered_taus": [],
+    "adjacent_sign_coherent": false
+  },
+  "C3": {
+    "slope": 1.15,
+    "pass": false,
+    "points": [
+      [
+        0.15,
+        0.04
+      ],
+      [
+        0.3,
+        0.07
+      ],
+      [
+        0.6,
+        0.16
+      ],
+      [
+        1.2,
+        0.47
+      ]
+    ]
+  },
+  "C4": {
+    "detail": {
+      "0.5": {
+        "mean_circ": 0.00015863975251970516,
+        "n": 8
+      },
+      "1.0": {
+        "mean_circ": -6.749838669293381e-05,
+        "n": 8
+      }
+    },
+    "z_vs_unbiased": {
+      "0.5": 0.52,
+      "1.0": 0.09
+    },
+    "monotone": false
+  },
+  "fork_d_engineered": false,
+  "fork_verdict": [
+    "(a) kinetic signature"
+  ]
+}
