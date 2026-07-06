@@ -1,5 +1,7 @@
 # SPEC — Entropy as Engine: the horizon-knob experiment
 
+> *Historical document, preserved as pre-registered under the project's original name and question ("entropy-as-engine"). The repo was renamed to entropy-as-tunable-equilibrium after the v3 finding answered the question — see [README](README.md) for the outcome.*
+
 **Target executor:** Claude Code (Opus / "ultra"), running on the Mac Studio (HQ).
 **Status:** v1 spec, ready to execute. Phase 0 already validated in sandbox (see §2).
 **Authoring lineage:** designed collaboratively (Anthony Vasquez / Temple of Two + Claude, web seat) over session `spiral_20260617_194931`. Ties to Sovereign Stack open thread `thread_20260623_020051_c5cf306c` (entropy-as-substrate).

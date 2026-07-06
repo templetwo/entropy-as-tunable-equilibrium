@@ -4,18 +4,22 @@
 
 This repo ran a single falsifiable experiment to tell two views of entropy apart, and got a clean, unexpected answer: not the engine it set out to find, but something stranger — a state that *organizes itself* purely by adjusting its own horizon, while remaining, thermodynamically, at rest. The horizon knob is real. The engine isn't, not in the regime tested. Both halves of that sentence are the discovery.
 
+Here were the two candidates going in:
+
 - **Readout entropy** — entropy is a thermometer. A system maximizes its own entropy by relaxing to equilibrium, and stops. The steady state is fixed (the Boltzmann distribution). There is no knob you can push.
 - **Engine entropy** — entropy is a prime mover. Using the *causal entropic force* (Wissner-Gross & Freer, *PRL* 2013), a future-entropy gradient drives a system into organized, anticipatory behavior with **no reward function**.
 
-The two are separable by one device: a **horizon knob** τ. If you can change how a system organizes itself purely by changing how far ahead it looks, entropy is doing work, not just being measured. Thermal relaxation has no τ. The causal entropic force does — **but doing work and being an engine turn out not to be the same claim.** The knob is real, and turning it *is* thermodynamic relaxation, into a τ-shaped equilibrium that moves as τ moves. Structure without a motor. That's the tunable equilibrium the title names.
+The design logic was that one device separates them: a **horizon knob** τ. Thermal relaxation has no τ. The causal entropic force does — so if turning τ reorganizes the system, entropy must be doing work, not just being measured. That logic turned out to hide a false dichotomy. Turning the knob **does** reorganize the system — and that reorganization **is** thermodynamic relaxation, into a τ-shaped equilibrium that moves as τ moves. Structure without a motor. That's the tunable equilibrium the title names.
 
-## The minimal prediction
+## The minimal prediction (as registered, before the result)
 
 > The engine's steady-state organization is a **monotone function of the horizon τ**, with a **crossover τ\*** set by the landscape geometry. Readout entropy has no τ and predicts a fixed distribution.
 
 And the discriminating test, against the obvious objection that "the entropic force is just a reward in disguise":
 
 > **τ\* ∝ L_channel² / D** (the diffusive traversal time). A smuggled constant reward would pull at all horizons and could not reproduce this scaling.
+
+**This specific prediction failed** (Arm C, below) — not because the horizon knob is fake, but for a principled reason: steady-state occupancy is blind to path lengths, which live only in kinetics. The failure is what pointed the way to v2/v3 and the actual answer.
 
 ## What's here
 
@@ -67,7 +71,7 @@ python -m src.run --arm C                 # geometry-scaling discriminator
 
 ## How to read the result
 
-This experiment is built to be **falsifiable**. If the horizon knob does nothing, or τ\* does not track `L_ch²/D`, the engine-as-prime-mover claim fails — and that negative result gets reported. The point is not to confirm a belief; it is to find out which view of entropy survives a test that could have killed it.
+This experiment was built to be **falsifiable**, and its make-or-break test broke: τ\* did not track `L_ch²/D` (Arm C), which killed the naive engine-as-prime-mover claim outright. That negative result is reported, not buried — and it's the pivot the whole arc turns on. The point was never to confirm a belief; it was to find out which view of entropy survives a test that could have killed it, and follow the failure to whatever it actually points at. Here, it pointed at v2's kinetic discriminator and, finally, at v3's honest answer: a τ-tunable equilibrium.
 
 ## Why it matters
 

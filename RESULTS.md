@@ -1,5 +1,7 @@
 # RESULTS — Entropy as Engine
 
+> *Historical document, preserved as pre-registered under the project's original name and question ("entropy-as-engine"). The repo was renamed to entropy-as-tunable-equilibrium after the v3 finding answered the question — see [README](README.md) for the outcome.*
+
 Executor: Claude Code (Opus 4.8, "ultra"), **MacBook Pro seat** (the SPEC targeted the
 Studio; this run is the MacBook — see Environment). Verified-before-declared throughout.
 
