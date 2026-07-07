@@ -1,0 +1,9 @@
+# prereg internal consistency
+valid JSON:                    True
+prereg.version:                v4h-1.4.0
+prereg.source_sha_at_reg:      0b65a9ee92b9fe2c
+live v44_scout.py sha256[:16]: 0b65a9ee92b9fe2c -> MATCH
+prereg.config_hash:            a344d6c47c8a22c1
+recomputed from prereg.config: a344d6c47c8a22c1 -> MATCH
+scout cells in prereg.config:  [('A', 0.1, 2.0, 1.0), ('B', 0.25, 2.0, 1.0), ('C', 0.1, 1.0, 1.0), ('D', 0.25, 1.0, 1.0), ('AxT2', 0.1, 2.0, 2.0), ('AxT4', 0.1, 2.0, 4.0)]
+scout units leaked into confirmatory unit list: NONE (correctly quarantined)

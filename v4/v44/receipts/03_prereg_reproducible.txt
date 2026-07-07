@@ -1,0 +1,5 @@
+# --plan reproducibility
+run1 sha256:      b7c5aeb6bd21b70036f7fb6841f199fbf923aa984cba3d30a71943c75e9a2a2b
+run2 sha256:      b7c5aeb6bd21b70036f7fb6841f199fbf923aa984cba3d30a71943c75e9a2a2b
+prereg_v44.json:  b7c5aeb6bd21b70036f7fb6841f199fbf923aa984cba3d30a71943c75e9a2a2b
+reproducible + matches file: YES

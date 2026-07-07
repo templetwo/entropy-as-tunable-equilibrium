@@ -1,0 +1,19 @@
+# v44pilot dir tree + per-file sha256  (re-captured post-nit-fix 2026-07-07T03:15:10Z)
+
+total 216
+drwxr-xr-x@  9 tony_studio  staff    288 Jul  6 23:15 .
+drwxr-xr-x@ 17 tony_studio  staff    544 Jul  6 23:13 ..
+-rw-r--r--@  1 tony_studio  staff    424 Jul  6 23:15 MANIFEST.sha256
+-rw-r--r--@  1 tony_studio  staff  18621 Jul  6 22:14 prereg_v44.json
+drwxr-xr-x@  9 tony_studio  staff    288 Jul  6 23:13 receipts
+-rw-r--r--@  1 tony_studio  staff   8349 Jul  6 22:20 SCOUT_DECLARATION.md
+-rw-r--r--@  1 tony_studio  staff  11166 Jul  6 22:00 v44_scout_BUILD_SPEC.md
+-rw-r--r--@  1 tony_studio  staff   5051 Jul  6 23:15 v44_scout_DESIGN.md
+-rw-r--r--@  1 tony_studio  staff  52576 Jul  6 22:11 v44_scout.py
+
+# per-file sha256:
+0b65a9ee92b9fe2c6b5701ed2db9acaf1a4486f9d1db8e1d3047f5f6490b7c38  ./v44_scout.py
+d4768518668d31ab19647ba07f2f8686a526d41391b215d0a978e273c6b829dd  ./SCOUT_DECLARATION.md
+b7c5aeb6bd21b70036f7fb6841f199fbf923aa984cba3d30a71943c75e9a2a2b  ./prereg_v44.json
+1ae9c694e23caf5eab619d5ce367f9c2915dcc491fd093ab8588054e990770b1  ./v44_scout_DESIGN.md
+b81c0982bc7de9a462b514f4e8103db033028cfba8d73ca3c89f39a2e0a241b8  ./v44_scout_BUILD_SPEC.md

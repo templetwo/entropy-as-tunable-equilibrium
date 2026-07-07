@@ -1,0 +1,6 @@
+# shasum -a 256 -c MANIFEST.sha256 (post-fix)
+v44_scout.py: OK
+prereg_v44.json: OK
+v44_scout_DESIGN.md: OK
+v44_scout_BUILD_SPEC.md: OK
+SCOUT_DECLARATION.md: OK
