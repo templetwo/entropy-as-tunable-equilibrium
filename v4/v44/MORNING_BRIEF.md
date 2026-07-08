@@ -1,0 +1,45 @@
+# v4.4 Scout — Overnight Autonomous Hardening Brief
+
+*Autonomous loop activated 2026-07-08 ~00:30 EDT (Anthony asleep; "my fatigue cannot stop the forward motion"). An hourly cron fires a Fable-driven feedback loop: 3-lens diverse re-pass -> draft the fix -> repeat, until all three lenses return ratifiable-as-is (converged). NEVER registers — that waits for Anthony + external ChatGPT/Antigravity re-review. Each pass commits new versions + chronicles. Read top-down; newest passes appended below.*
+
+## State at activation
+- **v3.2 belt VALIDATED** (Fable OC sim, P1 modeled, clean): wrong-sign-at-floor invalid pivot 5e-5 (full) / 7.85e-4 (belt-alone), both << 0.02 gate; false-GREEN 0.0027<=0.01; GREEN power@3x 0.99996; partition 1.0. The RED magnitude bound genuinely closed the wrong-sign leak on the mu_hat axis.
+- **v3.2 NOT ratifiable** — inferential lens found the category error on FOUR new axes: F1 statistic (claims "raw currents", bounds only quad not omega), F2 cell-set (P2 demotion drops underpowered cells from the pivot denominator), F3 anomaly (§8 grid-artifact test = significance-absence -> artifact-absence), F4 STABLE-coupling (suspenders assume curl<->current coupling; belt still carries it). Plus F5/F6 minors.
+- **v3.3 hardening launched** against F1-F6. Committed milestone: v3.1 cycle @ 81cda19.
+
+## Passes
+
+### cron 00:45 EDT
+Loop wk4q2nhym ACTIVE (v3.3 drafted 00:45, 3-lens re-pass running); lock fresh, deferred second pass. Committed v3.2 belt + OC validation milestone. v3.3+ commit on loop completion.
+watchdog 00:52 EDT: HEALTHY (loop active hardening v3.3, last commit 8a5e289 5m ago, lock fresh)
+watchdog 01:11 EDT: HEALTHY (latest v3.4 @01:10, loop wk4q2nhym active hardening, lock fresh ~24min, last commit 00:47 v3.2; v3.4 uncommitted — active loop owns commit/chronicle on completion; no converged marker)
+
+### LOOP wk4q2nhym COMPLETE — 01:14 EDT (v3.2 -> v3.3 -> v3.4)
+Result: final_version=3.4, converged=FALSE, 3 iterations.
+- iter1 v3.2 re-pass: 7 blocker/major, all 3 lenses "ratifiable-with-fixes"
+- iter2 v3.3 re-pass: 9 blocker/major, adversarial lens "not-ratifiable" (regression, then repaired)
+- iter3 v3.4 re-pass: 6 blocker/major, all 3 lenses "ratifiable-with-fixes" (no lens rejecting)
+
+v3.4 is BEST STATE so far: closed the omega-veto-throttling BLOCKER (look axis, the 5th
+costume of the category error), added occupancy_x banding + GREEN veto (recorded-statistic
+axis, 6th costume), full-roster dict assertions (7th), rho in {-1,0,0.5,1,2} coupling arms
+(transduction-inversion), P1-A(omega) sign registration, all §9.3 hard-gate expectations
+RECOMPUTED via MC (seeds 20260708/20260709). Real substantive hardening, not churn.
+
+>> HQ READ FOR ANTHONY (convergence-bar judgment call, your final say):
+The 3 Fable lenses are prompted to always hunt "the next costume of the category error on
+ANY axis." Findings/iter: 7 -> 9 -> 6. This is NOT converging to zero and may not by
+construction — an adversarial lens can nearly always build SOME edge config against a
+finite threshold rule. The rule IS materially better each pass (5 axes now closed, each
+with computed arithmetic). My read: we are in the diminishing-returns tail; "all 3 lenses
+ratifiable-as-is" (zero blocker/major) may be an unreachable asymptote given adversarial
+prompting. The decision to STOP internal hardening and route v3.x to EXTERNAL re-review
+(ChatGPT methodology + Antigravity re-audit) is YOURS + the external reviewers' — it was
+always the registration gate. The autonomous loop should not decide convergence by hitting
+an unreachable zero. Recommend: you review v3.4 in the morning, decide whether the residual
+6 majors are (a) real must-fix or (b) the adversarial tail, and set the external-review
+handoff point.
+
+Committed v3.3 + v3.4 + this brief + oc_run_v32.log. Lock released. NOT registered, NOT
+converged, no frozen bytes touched. Hourly cron will continue passes from v3.4 unless you
+intervene.
