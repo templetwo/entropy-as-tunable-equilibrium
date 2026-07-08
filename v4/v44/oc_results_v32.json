@@ -1,0 +1,257 @@
+{
+  "artifact": "oc_simulation_v32.py",
+  "rule": "v4.4 scout decision-rule v3.2 (frozen)",
+  "interpreter": "/usr/bin/python3",
+  "numpy_version": "2.0.2",
+  "rng_seed": 20260707,
+  "P1_modeled": true,
+  "stable_model": {
+    "form": "p_true = 0.5 + 0.5*rho*tanh(|mu_true|/noise_scale); agree-with-registered = p_true (right sign), 1-p_true (wrong sign), 0.5 (null); STABLE iff >=12/16",
+    "noise_scale": 1.392135836583485,
+    "rhos": [
+      0.0,
+      0.3,
+      0.6,
+      0.9
+    ],
+    "tanh_at_floor": 0.3799489622552249
+  },
+  "constants_check": {
+    "floor_96": 0.5568543346333941,
+    "floor_128": 0.48225,
+    "SE_16": 0.2795084971874737,
+    "SE_32": 0.21650635094610965
+  },
+  "partition": {
+    "grid_points": 300075,
+    "completeness": 1.0,
+    "raw_predicate_overlaps_v32": 0,
+    "raw_predicate_overlaps_v31": 52432,
+    "note": "v3.1 aligned-RED raw predicate overlaps ANOMALOUS by construction (x < -t*SE implies x < kappa); the frozen ANOMALOUS-before-RED precedence resolves it. v3.2 |mu| RED is disjoint from ANOMALOUS (kappa < t*SE at every stage), so overlaps must be 0."
+  },
+  "boundary_selftests": {
+    "wrong_sign_at_floor_not_RED_v32": true,
+    "wrong_sign_at_floor_raw_red_v31": true,
+    "two_sided_RED_unreachable_stage1": true,
+    "two_sided_RED_reachable_stage2": true,
+    "anom_red_never_cofire_v32": true,
+    "mid_band_cell_is_AMBER_all_stages": true
+  },
+  "S1": {
+    "trials": 200000,
+    "model": "all null, sigma=None (INDETERMINATE), two-sided banding",
+    "per_cell_false_green": 0.0003558333333333333,
+    "any_cell_false_green": 0.002135,
+    "any_cell_false_green_mc_se": 0.00010320953868223615,
+    "pivot_rate": 0.012075,
+    "any_inconclusive_rate": 0.98787,
+    "any_anomalous_rate": 0.0,
+    "per_cell_band_dist": {
+      "GREEN": 0.0003558333333333333,
+      "RED": 0.48034083333333333,
+      "ANOMALOUS": 0.0,
+      "INCONCLUSIVE_AT_CEILING": 0.5193033333333333
+    }
+  },
+  "S1b": {
+    "trials": 50000,
+    "model": "all null, force-registered sigma=+1, STABLE modeled (p=0.5)",
+    "per_cell_false_green": 0.00044666666666666666,
+    "any_cell_false_green": 0.00268,
+    "per_cell_terminal_false_anomaly": 0.04765666666666667,
+    "any_cell_terminal_false_anomaly": 0.25432,
+    "all_red_rate": 0.14672,
+    "pivot_rate_by_rho": {
+      "0.0": 0.0,
+      "0.3": 0.0,
+      "0.6": 0.0,
+      "0.9": 0.0
+    },
+    "stable_chance_exact": 0.0384063720703125
+  },
+  "S2": {
+    "trials": 200000,
+    "mu_A_true": -0.5568543346333941,
+    "sigma_A_registered": 1,
+    "model": "wrong-sign at floor; nulls INDETERMINATE two-sided; STABLE modeled per module docstring",
+    "A_band_dist_v32": {
+      "GREEN": 0.0,
+      "RED": 0.032905,
+      "ANOMALOUS": 0.87192,
+      "INCONCLUSIVE_AT_CEILING": 0.095175
+    },
+    "A_band_dist_v31": {
+      "GREEN": 0.0,
+      "RED": 0.388065,
+      "ANOMALOUS": 0.61193,
+      "INCONCLUSIVE_AT_CEILING": 5e-06
+    },
+    "A_red_rate_v32": 0.032905,
+    "A_red_rate_v31": 0.388065,
+    "A_anomalous_rate_v32": 0.87192,
+    "nulls_all_red_rate": 0.02583,
+    "decomposition_by_rho": {
+      "0.0": {
+        "invalid_pivot_full_v32": 5e-05,
+        "invalid_pivot_belt_only": 0.000785,
+        "invalid_pivot_suspenders_only": 0.000415,
+        "mc_se_full": 1.5810993011193194e-05,
+        "mc_se_belt": 6.262522554849602e-05,
+        "mc_se_susp": 4.554271484002683e-05,
+        "A_red_and_stable_v32": 0.001185,
+        "A_red_and_stable_v31": 0.01448,
+        "p_seed_agrees_registered": 0.5,
+        "P_stable_exact": 0.0384063720703125
+      },
+      "0.3": {
+        "invalid_pivot_full_v32": 1e-05,
+        "invalid_pivot_belt_only": 0.000785,
+        "invalid_pivot_suspenders_only": 0.000115,
+        "mc_se_full": 7.0710324564380276e-06,
+        "mc_se_belt": 6.262522554849602e-05,
+        "mc_se_susp": 2.397777877535782e-05,
+        "A_red_and_stable_v32": 0.000405,
+        "A_red_and_stable_v31": 0.004945,
+        "p_seed_agrees_registered": 0.4430076556617163,
+        "P_stable_exact": 0.012922764260649946
+      },
+      "0.6": {
+        "invalid_pivot_full_v32": 0.0,
+        "invalid_pivot_belt_only": 0.000785,
+        "invalid_pivot_suspenders_only": 4.5e-05,
+        "mc_se_full": 5e-06,
+        "mc_se_belt": 6.262522554849602e-05,
+        "mc_se_susp": 1.499966249620304e-05,
+        "A_red_and_stable_v32": 0.000105,
+        "A_red_and_stable_v31": 0.00139,
+        "p_seed_agrees_registered": 0.3860153113234326,
+        "P_stable_exact": 0.003458987152195038
+      },
+      "0.9": {
+        "invalid_pivot_full_v32": 0.0,
+        "invalid_pivot_belt_only": 0.000785,
+        "invalid_pivot_suspenders_only": 0.0,
+        "mc_se_full": 5e-06,
+        "mc_se_belt": 6.262522554849602e-05,
+        "mc_se_susp": 5e-06,
+        "A_red_and_stable_v32": 2e-05,
+        "A_red_and_stable_v31": 0.000235,
+        "p_seed_agrees_registered": 0.32902296698514877,
+        "P_stable_exact": 0.0006934042362986756
+      }
+    }
+  },
+  "S3": {
+    "trials": 50000,
+    "mu_A_true": 0.5568543346333941,
+    "A_band_dist": {
+      "GREEN": 0.12046,
+      "RED": 0.03366,
+      "ANOMALOUS": 8e-05,
+      "INCONCLUSIVE_AT_CEILING": 0.8458
+    },
+    "A_terminal_stage_dist": {
+      "stage1": 0.0847,
+      "stage2": 0.0392,
+      "stage3": 0.8761
+    },
+    "A_extend_rate_past_stage1": 0.9153,
+    "A_inconclusive_rate": 0.8458,
+    "pivot_by_rho": {
+      "0.0": {
+        "pivot_rate": 2e-05,
+        "P_stable_exact": 0.0384063720703125
+      },
+      "0.3": {
+        "pivot_rate": 0.00016,
+        "P_stable_exact": 0.09437680014755312
+      },
+      "0.6": {
+        "pivot_rate": 0.00026,
+        "P_stable_exact": 0.19659706926817272
+      },
+      "0.9": {
+        "pivot_rate": 0.00028,
+        "P_stable_exact": 0.3526880827305389
+      }
+    }
+  },
+  "S4": {
+    "trials": 50000,
+    "2x": {
+      "mu_A_true": 1.1137086692667881,
+      "green_power_cell_A": 0.91612,
+      "green_power_mc_se": 0.0012397108178926243,
+      "green_by_stage": {
+        "stage1": 0.6128,
+        "stage2": 0.24478,
+        "stage3": 0.05854
+      },
+      "A_band_dist": {
+        "GREEN": 0.91612,
+        "RED": 2e-05,
+        "ANOMALOUS": 0.0,
+        "INCONCLUSIVE_AT_CEILING": 0.08386
+      },
+      "register_rate_any_green": 0.91624,
+      "law2_planted_signal_breaks_pivot": 0.99998
+    },
+    "3x": {
+      "mu_A_true": 1.6705630039001822,
+      "green_power_cell_A": 0.99996,
+      "green_power_mc_se": 2.828370555639413e-05,
+      "green_by_stage": {
+        "stage1": 0.97866,
+        "stage2": 0.0211,
+        "stage3": 0.0002
+      },
+      "A_band_dist": {
+        "GREEN": 0.99996,
+        "RED": 0.0,
+        "ANOMALOUS": 0.0,
+        "INCONCLUSIVE_AT_CEILING": 4e-05
+      },
+      "register_rate_any_green": 0.99996,
+      "law2_planted_signal_breaks_pivot": 1.0
+    }
+  },
+  "S5": {
+    "trials": 50000,
+    "sd_true_per_cell": [
+      1.0,
+      1.03875,
+      1.155,
+      1.34875,
+      1.62,
+      1.96875
+    ],
+    "per_cell_false_green": 0.00044666666666666666,
+    "any_cell_false_green": 0.00268,
+    "any_cell_false_green_mc_se": 0.00023120629749208822,
+    "pivot_rate": 0.01278,
+    "any_inconclusive_rate": 0.98716
+  },
+  "hard_gates": {
+    "false_green_null_le_0.01": {
+      "value": 0.00268,
+      "threshold": 0.01,
+      "pass": true
+    },
+    "invalid_pivot_wrong_sign_at_floor_le_0.02_v32_full": {
+      "value": 5e-05,
+      "threshold": 0.02,
+      "pass": true
+    },
+    "green_power_3x_ge_0.90": {
+      "value": 0.99996,
+      "threshold": 0.9,
+      "pass": true
+    },
+    "partition_completeness_eq_1.0": {
+      "value": 1.0,
+      "threshold": 1.0,
+      "pass": true
+    }
+  },
+  "verdict": "clean"
+}
