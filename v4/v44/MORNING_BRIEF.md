@@ -43,3 +43,8 @@ handoff point.
 Committed v3.3 + v3.4 + this brief + oc_run_v32.log. Lock released. NOT registered, NOT
 converged, no frozen bytes touched. Hourly cron will continue passes from v3.4 unless you
 intervene.
+watchdog 01:31 EDT: HEALTHY (latest v3.4, last commit 8ca851f ~9min ago, lock free/released post-loop, no converged marker; awaiting hourly cron for next pass from v3.4)
+watchdog 01:51 EDT: HEALTHY (loop w3iqhldyy active hardening from v3.4, lock fresh ~9min held-by cron, no converged marker; inline check — pass in flight this session)
+
+### INCIDENT — 02:12 EDT: loop w3iqhldyy misdrafted onto v3.4 (filename slip)
+The Fable draft agent wrote its new draft into v44_scout_DECISION_RULE_v3.4.md (clobbered committed v3.4: 103870B -> 60634B mid-write) instead of creating v3.5.md. No v3.5 exists; loop is on a corrupted path (would review a nonexistent v3.5). Committed v3.4 SAFE in git HEAD (8ca851f). Stochastic slip (wk4q2nhym drafted v3.3+v3.4 correctly). Recovery: stop loop -> quarantine misdraft to scratchpad -> git checkout committed v3.4 -> release lock -> next cron re-runs from v3.4. LESSON for completion handler: after any loop, git-status-check for a MODIFIED prior version file (mis-fired draft) since the workflow sandbox has no fs access to self-verify filenames.
