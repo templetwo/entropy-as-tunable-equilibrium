@@ -1,0 +1,17 @@
+{
+  "seed": 20260708,
+  "interpreter": "python3.9.6/numpy2.0.2",
+  "N": 4000000,
+  "floor96": 0.55685,
+  "rerun_H0_alpha": 0.04999,
+  "rerun_per_contrast_power_n56": 0.91335,
+  "wrongsign_terminal_band_dist": {
+    "ANOM": 0.83229,
+    "INCONCLUSIVE": 0.14765,
+    "RED": 0.02006
+  },
+  "compound_full_union_protection": 0.97994,
+  "disposition_only_reading": 0.76017,
+  "gate1_false_GREEN_on_null_percell": 0.000236,
+  "gate4_GREEN_power_at_+3xfloor": 0.99991
+}
