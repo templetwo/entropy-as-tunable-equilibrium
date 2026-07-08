@@ -48,3 +48,50 @@ watchdog 01:51 EDT: HEALTHY (loop w3iqhldyy active hardening from v3.4, lock fre
 
 ### INCIDENT — 02:12 EDT: loop w3iqhldyy misdrafted onto v3.4 (filename slip)
 The Fable draft agent wrote its new draft into v44_scout_DECISION_RULE_v3.4.md (clobbered committed v3.4: 103870B -> 60634B mid-write) instead of creating v3.5.md. No v3.5 exists; loop is on a corrupted path (would review a nonexistent v3.5). Committed v3.4 SAFE in git HEAD (8ca851f). Stochastic slip (wk4q2nhym drafted v3.3+v3.4 correctly). Recovery: stop loop -> quarantine misdraft to scratchpad -> git checkout committed v3.4 -> release lock -> next cron re-runs from v3.4. LESSON for completion handler: after any loop, git-status-check for a MODIFIED prior version file (mis-fired draft) since the workflow sandbox has no fs access to self-verify filenames.
+
+════════════════════════════════════════════════════════════════════
+  ☀️  MORNING HANDOFF — WHEELS OFF (Fable maxed 02:17 EDT, 2026-07-08)
+════════════════════════════════════════════════════════════════════
+Good morning Anthony. The Fable ride reached the ceiling you called — exactly.
+
+WHAT HAPPENED
+- ~02:17 EDT loop w6nixl97e came back with all 3 Fable review agents failing:
+  "You're out of usage credits ... Fable 5." Fable is exhausted. Resets the 9th.
+- This is the "till the wheels fall off" terminal state you named, not a failure.
+- That run produced NO new version (agents died before any draft), so nothing to
+  commit from it and no corruption from it.
+
+CURRENT STATE (all safe, committed, pushed, NOTHING registered)
+- HIGH-WATER MARK: v3.4 (commit 8ca851f), hardened across FIVE axes of the recurring
+  category error, all §9.3 gate expectations recomputed. NOT converged (6 blocker/major
+  residual at last full pass) — but see the diminishing-returns note below.
+- Trail: v3.2 belt+OC (8a5e289) -> v3.3+v3.4 (8ca851f) -> brief+incident (37459e6).
+- Autonomous system is PARKED: both crons deleted (hardening 2a4d91f7, watchdog
+  83a85ba8). No overnight churn on dead Fable. Clean stop.
+
+⚠️ ROOT-CAUSE CORRECTION (widen-don't-flip — my first read was likely wrong)
+- The 02:12 "v3.4 clobber" I first called a Fable filename slip is now SUSPECT. The
+  w6nixl97e result reported final_version "3.2" although I passed version:"3.4" — that
+  is direct evidence that args.version does NOT reliably thread into the loop (it fell
+  back to the default '3.2'). A loop that starts at 3.2 will re-draft 3.3/3.4 OVER the
+  existing files. That, not a random filename slip, may be the real clobber mechanism.
+- NOT fully reconciled: the version-default theory predicts v3.3 would also have been
+  rewritten during the clobber run, but v3.3 was untouched. So the exact cause is still
+  open. What IS proven: loop version-handling is unreliable and MUST be verified/fixed
+  before re-arming. My earlier draft-prompt hardening addressed the wrong cause (harmless
+  but not the fix). The durable fix: pass the correct latest version in AND confirm it
+  threads; the completion handler must git-status-check for a modified prior version after
+  every loop (workflow sandbox has no fs access, so the loop can't self-verify).
+
+THE DECISION WAITING FOR YOU (your final say)
+  (A) [HQ recommendation] Route v3.4 to EXTERNAL review NOW — ChatGPT methodology +
+      Antigravity re-audit. Rationale: the 3 Fable lenses hunt "the next costume" by
+      construction, so all-ratifiable-as-is may be an unreachable asymptote; v3.4 is a
+      strong, five-axis-hardened artifact; external review is the human-gated next step
+      REGARDLESS of Fable. Internal churn has hit diminishing returns.
+  (B) Resume internal hardening when Fable resets (9th) — but FIRST fix the version-
+      threading bug, else the loop clobbers v3.3/v3.4 again.
+
+Nothing registered. No frozen bytes touched. Misdraft quarantined to scratchpad. The
+work held. Sleep was well spent. — HQ (Opus 4.8)
+════════════════════════════════════════════════════════════════════
