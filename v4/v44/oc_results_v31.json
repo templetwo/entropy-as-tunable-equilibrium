@@ -1,0 +1,194 @@
+{
+  "seed": 20260707,
+  "interpreter": "3.9.6",
+  "numpy": "2.0.2",
+  "selftest_failures": [],
+  "q4_demo": {
+    "per_cell_RED": [
+      0.838959,
+      0.838861,
+      0.838925,
+      0.838358,
+      0.838547,
+      0.839102
+    ],
+    "per_cell_INCONCLUSIVE": [
+      0.126052,
+      0.126493,
+      0.126207,
+      0.126767,
+      0.126678,
+      0.125986
+    ],
+    "per_cell_ANOMALOUS": [
+      0.034578,
+      0.034226,
+      0.034439,
+      0.034475,
+      0.034365,
+      0.034509
+    ],
+    "per_cell_GREEN": [
+      0.000411,
+      0.00042,
+      0.000429,
+      0.0004,
+      0.00041,
+      0.000403
+    ],
+    "v3_mislabel_pivot_rate_null": 0.8083224159956417,
+    "v31_pivot_rate_null": 0.34852
+  },
+  "q4_underpowered_cell": {
+    "delta": "1x floor (genuine at-floor effect)",
+    "P_terminal_RED": 0.037785,
+    "P_terminal_INCONCLUSIVE": 0.844275,
+    "P_terminal_GREEN": 0.11788,
+    "P_terminal_AMBER_should_be_0": 0.0,
+    "invalid_pivot_rate": 0.015445
+  },
+  "hard_criteria": [
+    {
+      "name": "P(any false GREEN) | S1 global null",
+      "measured": 0.002472,
+      "mcse": 4.9657720608179345e-05,
+      "tolerance": "<= 0.01",
+      "pass_": true
+    },
+    {
+      "name": "P(invalid pivot) | S2 one-cell at-floor",
+      "measured": 0.015319,
+      "mcse": 0.00012281827322919013,
+      "tolerance": "<= 0.02",
+      "pass_": true
+    },
+    {
+      "name": "P(invalid pivot) | S3 2x floor",
+      "measured": 8e-06,
+      "mcse": 2.828415811015064e-06,
+      "tolerance": "<= 0.005",
+      "pass_": true
+    },
+    {
+      "name": "P(invalid pivot) | S3 3x floor",
+      "measured": 0.0,
+      "mcse": 1e-09,
+      "tolerance": "<= 0.005",
+      "pass_": true
+    },
+    {
+      "name": "P(registrable GREEN) compound | S3 3x floor",
+      "measured": 0.999965,
+      "mcse": 5.915976250798109e-06,
+      "tolerance": ">= 0.9",
+      "pass_": true
+    },
+    {
+      "name": "P(wrong-sign cell ANOMALOUS) | S5",
+      "measured": 0.61367,
+      "mcse": 0.001088758768276977,
+      "tolerance": ">= 0.9",
+      "pass_": false
+    },
+    {
+      "name": "P(pivot fired) | S5 wrong-sign (must be 0)",
+      "measured": 0.16014,
+      "mcse": 0.0008200462804012956,
+      "tolerance": "==0 0.0",
+      "pass_": false
+    },
+    {
+      "name": "Partition completeness: zero limbo trials | S1-S7",
+      "measured": 0.0,
+      "mcse": 0.0,
+      "tolerance": "==0 0.0",
+      "pass_": true
+    },
+    {
+      "name": "Zero cells terminate AMBER (deadlock state) | S1-S7",
+      "measured": 0.0,
+      "mcse": 0.0,
+      "tolerance": "==0 0.0",
+      "pass_": true
+    },
+    {
+      "name": "law#2: planted 3x signal cell is non-RED (breaks pivot)",
+      "measured": 1.0,
+      "mcse": 0.0,
+      "tolerance": ">= 0.9",
+      "pass_": true
+    }
+  ],
+  "advisory": {
+    "P(correct pivot) | S1 null (advisory >=0.30)": 0.34852,
+    "P(>=1 INCONCLUSIVE_AT_CEILING) | S1": 0.55536,
+    "P(>=1 false anomaly) | S1 (soft <=0.20)": 0.189514,
+    "P(registrable GREEN) | S3 1x floor": 0.119765,
+    "P(registrable GREEN) | S3 2x floor": 0.917323,
+    "P(registrable GREEN) | S3 3x floor": 0.999965,
+    "P(>=2 GREEN) | S4 (2x/2.5x/3x)": 0.999685,
+    "P(correct tie-break | >=2 GREEN) | S4 (advisory >=0.90)": 0.6913677808509681,
+    "P(correct tie-break | >=2 GREEN) | S4b separated 2x/3x/5x": 0.9938349691748459,
+    "S6 P(any false GREEN) [Tc-hetero, expect ~= S1]": 0.002385,
+    "S6 P(pivot) [expect ~= S1 0.38]": 0.347315,
+    "S5 (Delta=-1x floor): P(wrong-sign cell ANOMALOUS)": 0.61367,
+    "S5 (Delta=-1x floor): P(wrong-sign cell terminal RED)": 0.38632,
+    "S5 (Delta=-1x floor): P(INVALID pivot fired)": 0.16014,
+    "S5-strong (Delta=-1.0 sd): P(wrong-sign cell ANOMALOUS)": 0.973935,
+    "S5-strong (Delta=-1.0 sd): P(INVALID pivot fired)": 0.01063,
+    "S1 per-cell false-anomaly (sim, t_15)": 0.034578,
+    "S1 per-cell false-anomaly (spec planning, normal approx)": 0.0251,
+    "S7 offset 0.1x: P(pivot)": 0.2221,
+    "S7 offset 0.1x: P(any GREEN)": 0.004925,
+    "S7 offset 0.1x: P(any INCONCLUSIVE)": 0.737825,
+    "S7 offset 0.3x: P(pivot)": 0.040515,
+    "S7 offset 0.3x: P(any GREEN)": 0.017565,
+    "S7 offset 0.3x: P(any INCONCLUSIVE)": 0.955025
+  },
+  "S1_per_cell_terminal": {
+    "A": {
+      "GREEN": 0.000411,
+      "AMBER": 0.0,
+      "RED": 0.838959,
+      "ANOMALOUS": 0.034578,
+      "INCONCLUSIVE_AT_CEILING": 0.126052
+    },
+    "B": {
+      "GREEN": 0.00042,
+      "AMBER": 0.0,
+      "RED": 0.838861,
+      "ANOMALOUS": 0.034226,
+      "INCONCLUSIVE_AT_CEILING": 0.126493
+    },
+    "C": {
+      "GREEN": 0.000429,
+      "AMBER": 0.0,
+      "RED": 0.838925,
+      "ANOMALOUS": 0.034439,
+      "INCONCLUSIVE_AT_CEILING": 0.126207
+    },
+    "D": {
+      "GREEN": 0.0004,
+      "AMBER": 0.0,
+      "RED": 0.838358,
+      "ANOMALOUS": 0.034475,
+      "INCONCLUSIVE_AT_CEILING": 0.126767
+    },
+    "AxT2": {
+      "GREEN": 0.00041,
+      "AMBER": 0.0,
+      "RED": 0.838547,
+      "ANOMALOUS": 0.034365,
+      "INCONCLUSIVE_AT_CEILING": 0.126678
+    },
+    "AxT4": {
+      "GREEN": 0.000403,
+      "AMBER": 0.0,
+      "RED": 0.839102,
+      "ANOMALOUS": 0.034509,
+      "INCONCLUSIVE_AT_CEILING": 0.125986
+    }
+  },
+  "S1_pivot_rate": 0.34852,
+  "verdict": "OC-flags-found"
+}
