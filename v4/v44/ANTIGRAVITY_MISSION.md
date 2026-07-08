@@ -38,3 +38,20 @@ A findings list, each ranked by **verdict-impact** (does it change whether the s
 ## Standing law you audit against (violate-none)
 
 Prereg-before-run + hash anchors (#1); gates fail-on-null (#2); compound-power ≥0.90 (#3); prose/config grep (#4); one centering reference = equal-arm mean (#5); pilots quarantined + never pooled (#6); raw NDJSON primary (#7); reset-vs-closed-NESS label distinction (#8); hash-frozen artifacts never edited, errata alongside (#9). Full text in `~/.claude/CLAUDE.md` "Standing experimental law."
+
+---
+
+# Round 2 (issued by HQ 2026-07-07, post-fix) — re-audit v3
+
+Your round-1 verdict (`AUDIT_VERDICT_ANTIGRAVITY.md`: **ratifiable with the listed fixes**, 6 findings) ran against the v2-era rule. HQ reconciled all six into `v44_scout_DECISION_RULE_v3.md` (§10 has the per-finding disposition table; commit `138d109` on `v4.4-scout-draft`). Round 2 is the close-out: **confirm each fix holds under your own attack, or break it.** Same lane as round 1: the scout still does not run, nothing is registered yet, HQ wrote the fixes so you grade them, not HQ.
+
+## Charge
+
+1. **Findings 1 + 4 — the repaired partition (§3, §7 `band_cell()`).** Re-run your round-1 falsification scenarios against the v3 bands: (a) a true null must be able to reach the pivot through the legitimate path with no un-banded gap and no deadlock at any operative config (16b/B96 primary; also check 8b where κ<0); (b) `μ̂ = −1.0·sd` (your Finding-4 scenario) must band ANOMALOUS, not RED; (c) injected true effects at ~1×/2×/3× floor must fire GREEN with sane probability. Then rule on the flagged tradeoff in §3 (≈26% chance across 6 true-null cells that a false ANOMALOUS blocks the pivot pending investigation): keep significance-against-0, or tighten with a magnitude margin — state your lean and why.
+2. **§3.3 RED-direction deviation — ratify or refuse (HQ's flagged deviation from v2 §5).** Independently re-derive HQ's Monte Carlo at the operative 16b/B96 config (4×10⁶ draws, spec inline in §3.3): floor-only upper-sd reading drives the at-floor false-null rate 3.9% → 18.9%; the frozen conjunction rule (point sd̂ AND coupled upper-CI sd_upper) holds it at 3.9%. `/usr/bin/python3` (numpy 2.0.2). Reproduce, don't trust prose — if your rates disagree materially, that is a finding.
+3. **Findings 2 / 3 / 5 / 6 — audit the §10 dispositions.** v3 claims: 2 covered by precondition P1 + §5(ii) UNSTABLE-can't-pivot; 3 fixed by T_c-scaled `sd_cell`; 5 carried as the §2.1 licensing caveat + §6.1; 6 scoped into the §8 config_hash/prereg re-issue. Confirm each is genuinely covered where claimed, or name what is still exposed with a concrete scenario.
+4. **Flag, don't settle.** The §1.1 OPEN ITEM (P1 sign recipe: mean-field-then-curl vs per-seed-unanimity — they can disagree per receipt 07) and the §9 open reviewer calls (equal-arm choice, B_max=128, estimand (a) licensing for T_c cells, 8-vs-16 blocks). State a lean per item; Anthony ratifies, you do not.
+
+## Deliverable
+
+Round-1 format. For each round-1 finding: **CONFIRMED CLOSED** or **STILL OPEN** (with the inputs → wrong-outcome scenario). Any NEW findings, severity-ranked by verdict-impact. Leans on the §1.1/§9 flagged items. Close with the one-line verdict on v3: **ratifiable as-is / ratifiable with the listed fixes / not ratifiable**. Same out-of-scope as round 1 (no registration, no chronicle, no running the scout, no editing frozen artifacts).
