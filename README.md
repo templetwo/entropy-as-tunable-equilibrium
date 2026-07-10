@@ -38,7 +38,7 @@ A particle in a potential landscape under overdamped Langevin dynamics, two cond
 | **Arm C** | τ\* tracks geometry (`τ\* ∝ L_ch²/D`) — the make-or-break test | ❌ **FALSIFIED** — τ\* is flat in L_ch (R²ₒᵣᵢgᵢₙ = −17.7). A D-scan shows τ\* ∝ 1/D (R²=0.97): τ\* is a diffusive geometric time set by **chamber** exploration (r_L), not **channel** length. See `RESULTS.md`. |
 | **v2** | First-passage discriminator (kinetic) | ✅ **thesis demonstrated** — MFPT ∝ sep²/D (R²=0.992) recovers the corridor signature occupancy is blind to; current test ⟨L_z⟩≈0 for the conservative engine. Engine vs readout: thermodynamically indistinguishable, kinetically distinguishable. |
 | **v3** | Engine-driven first-passage: does the τ-knob leave a fingerprint *no static U can mimic?* | ➖ **honest negative (conservative 1D)** — the τ-knob is a real FPT dial (MFPT 13.9→6.1 vs τ), but at each τ it *is* equilibrium relaxation in U_eff(τ) = −T_c S_c (definitional once Arm A holds; 1D is curl-free). Driven scaling α≈1 (drift, not diffusive α=2); ⟨L_z⟩≈0 re-confirms equivalence. No irreducible fingerprint here. Production figures + manifest under `figures/fig*`, `results/v3_manifest.json`. |
-| Arm D / v4 | Non-conservative force (2D+, curl ≠ 0) — where a non-vacuous irreducibility test exists | 🔜 frontier |
+| **Arm D / v4** | Non-conservative force (2D+, curl ≠ 0) — v4.0 instrument → v4.1/v4.2 kinetic-signature arc → v4.3 powered vortex control + anisotropic-horizon engine test | ✅ **complete (v4.0–v4.3)** — instrument **proven** (powered vortex control, Holm p=1e-4); anisotropic-horizon engine current: **bounded null** (floor 3.67e-5, more than 7× below the strongest cleanly-resolved vortex); the v4.1 kinetic separation dissolves at matched estimator M (estimator roughness, not implementation); occupancy micro-shift confirmed (p=0.024) and resolved to the **equilibrium** side — no probability current (detailed-balance follow-up, `v4/v43/followup/`; independent 72/72 bit-exact replication, `v4/v43/replication/claude-recompute/`). Every apparent positive resolves to equilibrium or estimator: the tunable-equilibrium thesis closes. Paper: `v4/paper/` |
 
 > **Outcome (see [RESULTS.md](RESULTS.md)).** The horizon knob is real (Phase 0, Arm B) and
 > the engine's organization obeys a genuine diffusive law (τ\* ∝ 1/D). The steady-state
@@ -52,7 +52,10 @@ A particle in a potential landscape under overdamped Langevin dynamics, two cond
 > honestly:** engine-driven first-passage *is* a real τ-dial, but in the conservative 1D regime
 > that dial is equilibrium relaxation in a τ-tunable U_eff(τ) (driven α≈1, zero current) — there is
 > *no* fingerprint a static potential cannot mimic. The genuine non-equilibrium frontier is **v4**
-> (a non-conservative force, 2D+, where curl and steady currents become possible). Prior-art context
+> (a non-conservative force, 2D+, where curl and steady currents become possible). **v4 walked that
+> frontier end-to-end (2026-07):** the instrument proved itself, the minimal non-conservative
+> extension produced a bounded null, and the last apparent positive resolved to the equilibrium
+> side — see the v4 row above and the paper in `v4/paper/`. Prior-art context
 > and honest novelty accounting: [docs/PRIOR_ART_AND_NOVELTY.md](docs/PRIOR_ART_AND_NOVELTY.md).
 
 ### Phase 0 result

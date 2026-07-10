@@ -1,0 +1,22 @@
+=== (1) OCCUPANCY SHIFT LOCATION ===
+TV(frozen,online) = 0.009989  (v43_analysis.json: 0.009989)
+bins = 24; top-3 bins [9, 0, 4] carry 42% of the shift
+per-bin |z|>2: [(0, -2.17), (3, 2.07), (4, 3.31), (5, 2.93), (9, -2.79), (10, -2.06)]
+single-bin/boundary artifact? NO — distributed
+
+=== (2) DETAILED-BALANCE DISCRIMINATOR (signed loop circulation) ===
+observable              frozen z  online z  fr-vs-on p
+quad.quad_loop_rate        -0.72     +0.91      0.2525
+roij.omega_roi             -1.70     -1.07      0.7270
+mouth.mouth_loop_rate      -1.46     +0.02      0.3617
+
+=== VERDICT ===
+Both arms loop-current-free AND no frozen-vs-online circulation difference.
+-> occupancy shift is a ~1% difference between two NEAR-EQUILIBRIUM force
+   fields (interpolated-frozen vs pointwise-online): estimation/numerical,
+   NOT a nonequilibrium engine signature.
+
+CAVEAT: circulation comparison is at the same modest B=32 power. Definitive
+closer (needs a NEW run, not in this data): M_grid / M_online sweep — shift->0
+as M->inf = pure numerical convergence error; persists = genuine frozen-vs-
+online estimator distinction (still equilibrium, still not the engine).
