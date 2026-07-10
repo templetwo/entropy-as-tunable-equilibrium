@@ -51,7 +51,8 @@ cd v4 && shasum -a 256 -c MANIFEST.sha256 MANIFEST_SUPPLEMENT.sha256
 - **`v43/`** — the complete v4.3 campaign: preregistration, frozen harness, canonical run,
   selftest artifact of record, independent replications (`v43/replication/`), and the
   detailed-balance follow-up (`v43/followup/`).
-- **`paper/`** — the deposited v4 manuscript covering the full arc (Zenodo DOI pending).
+- **`paper/`** — the v4 manuscript covering the full arc, published:
+  DOI [10.5281/zenodo.21288848](https://doi.org/10.5281/zenodo.21288848) (v4-1.0.0; git tag `v4.0.0`).
 
 ## Run contract
 
