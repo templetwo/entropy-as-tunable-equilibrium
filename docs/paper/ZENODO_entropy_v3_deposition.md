@@ -1,5 +1,7 @@
 # Zenodo deposition — entropy-as-tunable-equilibrium v3
 
+> *Deposition completed — published as DOI [10.5281/zenodo.21223845](https://doi.org/10.5281/zenodo.21223845) (v3-1.0.0, 2026-07-06). This file is preserved as the paste-ready metadata used for the upload.*
+
 Paste-ready metadata for the Zenodo upload form. Mirrors the provenance style
 of the prior Temple of Two depositions (human + AI co-authorship, honest
 contributions, code/data linked).

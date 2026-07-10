@@ -9,3 +9,13 @@ figures/*.png
 !figures/.gitkeep
 !results/.gitkeep
 .ipynb_checkpoints/
+# LaTeX build junk (docs/paper/BUILD.md instructs in-tree pdflatex runs)
+*.aux
+*.log
+*.out
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+*.toc
+*.bbl
+*.blg

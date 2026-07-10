@@ -1,0 +1,44 @@
+cff-version: 1.2.0
+message: >-
+  If you use this repository, please cite the published v3 manuscript
+  (see preferred-citation). To cite the code itself, use the metadata
+  in this file.
+title: entropy-as-tunable-equilibrium
+type: software
+authors:
+  - family-names: Vasquez
+    given-names: Anthony
+    affiliation: The Temple of Two
+  - name: Claude (Anthropic)
+repository-code: https://github.com/templetwo/entropy-as-tunable-equilibrium
+url: https://thetempleoftwo.com
+license: Apache-2.0
+keywords:
+  - causal entropic force
+  - stochastic thermodynamics
+  - first-passage time
+  - non-equilibrium steady state
+  - detailed balance
+  - entropy
+  - falsifiable negative
+  - multi-agent verification
+  - Langevin dynamics
+preferred-citation:
+  type: article
+  title: >-
+    Entropy as a Tunable Equilibrium, Not an Engine: A Falsifiable
+    Horizon-Knob Test of the Causal Entropic Force
+  authors:
+    - family-names: Vasquez
+      given-names: Anthony
+      affiliation: The Temple of Two
+    - name: Claude (Anthropic)
+  doi: 10.5281/zenodo.21223845
+  date-released: "2026-07-06"
+  year: 2026
+  month: 7
+  version: v3-1.0.0
+  license: CC-BY-4.0
+  publisher:
+    name: Zenodo
+  url: https://doi.org/10.5281/zenodo.21223845

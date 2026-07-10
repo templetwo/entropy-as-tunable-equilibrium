@@ -1,4 +1,4 @@
-# v4 — Entropy Engine, preregistered runs (v4.1 → v4.2)
+# v4 — Entropy Engine, preregistered runs (v4.0 → v4.3) + paper
 
 This directory is the **public, hash-anchored provenance record** for the v4 line of the
 entropy-engine experiment (2D two-chamber Langevin; first-passage-time + probability-current
@@ -18,10 +18,12 @@ detached from what generated it.
 | `v42_run.ndjson` | `3139ceb11c5c657233786c42446115fc686579337d40ffef712f86d91b344666` | `shasum -a 256 v42_run.ndjson` |
 | `v42_crossver_pin.ndjson` | `1d93c3f675aa07544ec96c1dd5ce66486baa73f9aba3cb5602a22d8e730b9fcc` | `shasum -a 256 v42_crossver_pin.ndjson` |
 
-Full file digests are in `MANIFEST.sha256`. Verify all at once:
+Full file digests are in `MANIFEST.sha256` (frozen with the campaign) and, for artifacts
+archived after it froze (`clean_run.ndjson`, `v42_analysis.json`), in
+`MANIFEST_SUPPLEMENT.sha256`. Verify all at once:
 
 ```bash
-cd v4 && shasum -a 256 -c MANIFEST.sha256
+cd v4 && shasum -a 256 -c MANIFEST.sha256 MANIFEST_SUPPLEMENT.sha256
 ```
 
 ## Files
@@ -39,7 +41,17 @@ cd v4 && shasum -a 256 -c MANIFEST.sha256
   correction (regenerative reset; `occ_gate_min_p 0.05` repair of the v4.1 distance-vs-alpha
   malformation) is defined against these.
 - **`FORENSIC_AND_RESULTS_2026-07-05.md`**, **`GROK_EXECUTION_CONTRACT.md`** — the v4.1 forensic
-  writeup and the multi-seat replication contract.
+  writeup and the multi-seat replication contract (the contract preserves the program's original
+  name, "entropy-as-engine", as issued; the script it delivered as `v4_fork_harness.py` is
+  committed here as `v41_harness.py`/`v42_harness.py`, whose usage docstrings retain the
+  delivery name).
+- **v4.0 pilot record** — `clean_run.ndjson` (60 units, every line stamped
+  `config_hash 2f8a9e985010c1f6`) and `v4_analysis.json`.
+- **`v42_analysis.json`** — the registered confirmatory analyzer's output (see Analysis status).
+- **`v43/`** — the complete v4.3 campaign: preregistration, frozen harness, canonical run,
+  selftest artifact of record, independent replications (`v43/replication/`), and the
+  detailed-balance follow-up (`v43/followup/`).
+- **`paper/`** — the deposited v4 manuscript covering the full arc (Zenodo DOI pending).
 
 ## Run contract
 
@@ -60,6 +72,10 @@ first-class registration anchor beside `config_hash` and `source_sha`.)
 
 ## Analysis status
 
-The confirmatory block-level Holm analysis against the frozen gates is run by the arbiter seat
-on `v42_run.ndjson`; its output lands here when complete. Forks are judged strictly on the
-registered gates — no post-hoc moves.
+Complete. The confirmatory block-level Holm analysis against the frozen gates was run on
+`v42_run.ndjson` and is archived here as `v42_analysis.json` (regenerated deterministically by
+the registered analyzer: `python3 v42_harness.py --analyze v42_run.ndjson`). Forks were judged
+strictly on the registered gates — no post-hoc moves. The arc continued and closed under
+`v43/` (v4.3: powered vortex control proven, anisotropic-horizon engine bounded null at floor
+3.67e-5, occupancy micro-shift resolved to the equilibrium side), with the manuscript deposited
+at `paper/`.

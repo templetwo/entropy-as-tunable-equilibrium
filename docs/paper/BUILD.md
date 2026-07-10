@@ -3,6 +3,8 @@
 This directory holds the manuscript for the v3 result:
 **"Entropy as a Tunable Equilibrium, Not an Engine."**
 
+> *The manuscript was subsequently published: DOI [10.5281/zenodo.21223845](https://doi.org/10.5281/zenodo.21223845) (2026-07-06). The pre-submission checklist below was completed; build instructions are preserved as-is.*
+
 ## Where it goes
 
 Place at `docs/paper/paper.tex` in the repo. The LaTeX uses

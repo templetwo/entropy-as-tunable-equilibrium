@@ -109,3 +109,25 @@ compute). 3 waits on 1+2. 6 waits on nothing (v4.3 numbers are final unless
 Opus's arbiter pass or Movement 5 finds a defect — hold submission, not
 drafting, on those). Opus arbiter verification is pending on its own side;
 its receipt closes the two-seat loop on v4.3.
+
+---
+
+## Status addendum — 2026-07-10 (HQ overwatch seat, post-deposit)
+
+Recorded per the standing law (corrections supersede, never erase); the score above is preserved
+as issued 2026-07-06.
+
+- **Movement 4 (Grok Build replication): COMPLETE** — 48/48 bit-exact on numpy 2.0.2 and 2.5.1;
+  receipts in `replication/grok-build/` (`VERDICT.md`, pinned by `MANIFEST_SUPPLEMENT.sha256`).
+- **Movement 5 (Antigravity audit): COMPLETE** — 5/5 findings real, 0/5 affect registered
+  verdicts (repo commit 8453b8e).
+- **Arbiter recompute receipt: LANDED** (2026-07-09) — independent replication at
+  `replication/claude-recompute/`, 72/72 bit-exact, closing the two-seat loop on v4.3.
+- **Movement 6 (paper): DEPOSITED** — `v4/paper/` (commits f289e4f → 97d7725); Zenodo DOI
+  pending. The claude-recompute VERDICT's pre-DOI action item (detailed-balance artifact "not
+  yet committed") was satisfied by deposit commit f289e4f (`followup/`).
+- **Erratum, recorded alongside a frozen file:** `followup/README.md` says the occupancy
+  micro-shift is discussed in paper §3.5; the correct section is §3.8 (true both at deposit
+  commit f289e4f and at HEAD). The frozen file is preserved as-is per law #9.
+- **Movements 1–3 (v4.4 scout → registration) remain the open work**, held on the §4 ladder
+  adjudication and decision-rule v3.1 (entropy-v4.4 lineage thread).

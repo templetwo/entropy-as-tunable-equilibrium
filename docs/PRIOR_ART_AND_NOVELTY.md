@@ -1,5 +1,7 @@
 # Prior Art and Current Research: Entropy as a Tunable Equilibrium
 
+> *Point-in-time review, written before v2–v4 executed. The forward-looking v2 recommendations were subsequently carried out; see [README](../README.md) for outcomes.*
+
 ## Executive Summary — “Are We Reinventing the Wheel?”
 
 **Verdict: Partially, but the project sits on defensible novel ground if reframed around its strongest contribution — the τ “horizon knob” as an experimental probe and the planned first-passage discriminator.** The underlying mechanism (the causal entropic force of Wissner-Gross & Freer 2013) and its key analytic consequence (a Boltzmann-like driven steady state p ∝ exp(βT_c S_c)) are established. The most important honest finding for the project: the “steady-state-can’t-see-kinetics” diagnosis is a **rediscovery of one of the most fundamental separations in statistical mechanics** — that equilibrium distributions under detailed balance are fixed by free energies alone and are blind to barriers, rates, and path lengths, which live only in kinetic observables (rates, mean first-passage times). This is not novel physics; it is a textbook truth (Hänggi-Talkner-Borkovec 1990; Gardiner; van Kampen). However, the project’s *application* of that truth — using it as a designed discriminator to separate “engine entropy” from “readout entropy,” and its specific failed prediction τ* ∝ L²/D — is a legitimate and instructive experimental contribution.
