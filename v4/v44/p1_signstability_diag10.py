@@ -80,18 +80,48 @@ def roi_curl_from_grids(Sx, Sy, xs, ys, estimator="stencil"):
     hx_roi, hy_roi = ROI["half"]
     dx = xs[1] - xs[0]
     dy = ys[1] - ys[0]
-    if estimator == "stencil":
+    if estimator in ("stencil", "stencil_clean"):
         # scout's operator: centered on interior points xs[1:-1], ys[1:-1]
         mp = (D[2:, 2:] - D[2:, :-2] - D[:-2, 2:] + D[:-2, :-2]) / (4 * dx * dy)
         xc, yc = xs[1:-1], ys[1:-1]
         mx = (xc >= cx - hx_roi) & (xc <= cx + hx_roi)
         my = (yc >= cy - hy_roi) & (yc <= cy + hy_roi)
-        return float(np.nansum(mp[np.ix_(mx, my)]))
+        sel = np.ix_(mx, my)
+        if estimator == "stencil_clean":
+            # DROP every stencil cell whose 2h corners touch a wall node whose
+            # entropy was NEVER SIMULATED (NaN, neighbor-mean filled by
+            # frozen_grid). 47% of the ROI's stencil cells do. Those cells carry
+            # a boundary-fill artifact, not physics.
+            keep = ~_dirty_mask(xs, ys)
+            return float(np.nansum((mp * keep)[sel]))
+        return float(np.nansum(mp[sel]))
     dDdx = np.gradient(D, xs, axis=0)
     d2 = np.gradient(dDdx, ys, axis=1)             # d2 D / dx dy
     mx = (xs >= cx - hx_roi) & (xs <= cx + hx_roi)
     my = (ys >= cy - hy_roi) & (ys <= cy + hy_roi)
     return float(d2[np.ix_(mx, my)].sum() * dx * dy)
+
+
+_DIRTY = {}
+
+
+def _dirty_mask(xs, ys):
+    """True where a 2h stencil cell's corners touch a blocked (NaN-filled) node."""
+    k = (len(xs), len(ys))
+    if k in _DIRTY:
+        return _DIRTY[k]
+    geom = Geom(BOX["Lx"], BOX["Ly"], BOX["wall_t"], BOX["ch_w_default"])
+    X, Y = np.meshgrid(xs, ys, indexing="ij")
+    blk = geom.blocked(np.stack([X, Y], axis=-1))
+    nx, ny = len(xs) - 2, len(ys) - 2
+    d = np.zeros((nx, ny), dtype=bool)
+    for ii in range(nx):
+        for jj in range(ny):
+            i, j = ii + 1, jj + 1
+            d[ii, jj] = (blk[i - 1, j - 1] or blk[i - 1, j + 1]
+                         or blk[i + 1, j - 1] or blk[i + 1, j + 1])
+    _DIRTY[k] = d
+    return d
 
 
 def one_realization(args):
@@ -110,7 +140,7 @@ def one_realization(args):
     return (Sx, Sy, xs, ys)
 
 
-EST = ("stencil", "gradient")
+EST = ("stencil", "stencil_clean", "gradient")
 
 
 def run_pair(pair, m_grid, n_seeds, pool):

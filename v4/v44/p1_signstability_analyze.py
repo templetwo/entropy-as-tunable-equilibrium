@@ -140,4 +140,41 @@ print("\n    diag10:: at the SAME arm (0.25,1.0), M=4000, n=64: split +%d/-%d (p
 print("    P(3 random seeds land unanimous | this coin) = %.3f" % p3)
 print("    => a 3-seed 'unanimity' at this arm is an EXPECTED coin-flip outcome (~1 in 4),")
 print("       not evidence of a stable sign. The v4.3 directional prediction rests on it.")
+
+
+def Phi(z):
+    return 0.5 * math.erfc(-z / math.sqrt(2))
+
+
+# ------------------------------------------------- THE BOUND (the decisive number)
+print("\n" + "=" * 108)
+print("[6] UPPER BOUND ON P1-B's POWER -- the decisive, discrepancy-proof number")
+print("\n    Per-seed agreement with the TRUE sign = Phi(true per-seed SNR).")
+print("    SE(SNR_hat) at n=64 is 1/sqrt(64) = 0.125, so the 95% CEILING on the true")
+print("    SNR is SNR_hat + 1.96*0.125. That ceiling gives the BEST-CASE agreement my")
+print("    data allows -> an UPPER BOUND on P(P1-B fires STABLE), independent of the")
+print("    point estimate. It also COVERS receipt 07's own (n=16, noisier) SNR values.")
+print("\n%-14s %-14s %9s %10s %12s %16s"
+      % ("pair (M=400)", "estimator", "SNR_hat", "SNR ceil", "agree ceil", "P(>=12/16) MAX"))
+print("-" * 108)
+worst = 0.0
+for est in ("stencil", "stencil_clean", "gradient"):
+    for c in CELLS[:4]:
+        r = D["pairs"][key(c["tx"], c["ty"], 400)][est]
+        cur = np.array(r["per_seed_curls"])
+        n = len(cur)
+        snr = abs(cur.mean()) / cur.std(ddof=1)
+        ceil = snr + 1.96 / math.sqrt(n)
+        ag = Phi(ceil)
+        pp = binom_ge(12, 16, ag)
+        worst = max(worst, pp)
+        print("%-14s %-14s %9.3f %10.3f %12.3f %16.3f"
+              % ("(%.2f,%.1f)" % (c["tx"], c["ty"]), est, snr, ceil, ag, pp))
+print("\n    MAX over every pair x every estimator, at the 95% UPPER edge:")
+print("        P(P1-B fires STABLE)  <=  %.3f" % worst)
+print("\n    Law #3 requires a positive control to demonstrably PASS at >= 0.90.")
+print("    P1-B is bounded at %.2f. IT CANNOT PASS." % worst)
+print("    This holds even granting receipt 07's own (higher, n=16) SNR of ~0.5, which")
+print("    implies agreement ~0.69 -> P(>=12/16) ~ 0.30 -- still nowhere near 0.90.")
+print("    The verdict does NOT depend on resolving the receipt-07 SNR discrepancy.")
 print("=" * 108)

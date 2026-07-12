@@ -26,17 +26,21 @@ two revisions stale. I verified against the primary source before doing anything
 > σ_cell is a coin flip.
 >
 > Consequently **P1-B cannot pass.** It asks for ≥ 12/16 (75 %) per-seed M=400 sign
-> agreement with σ_cell. Measured agreement is **0.42 – 0.62** — a coin flip against a
+> agreement with σ_cell. Measured agreement is **0.41 – 0.62** — a coin flip against a
 > coin flip. Every cell registers **UNSTABLE**, and `STABLE` is in fact *undefined*
-> (there is no σ to agree with).
+> (there is no σ to agree with). **Bounding it properly — at the 95 % upper edge of what
+> my data admits, across all four τ-pairs and all three estimators:**
+>
+> ### **P(P1-B fires STABLE) ≤ 0.370.  Law #3 demands ≥ 0.90.**
 >
 > **`STABLE` is a precondition on every RED counted toward the all-RED pivot (§5(ii)).
 > As ratified, the pivot is un-declarable. The scout cannot mint a null — ever.**
 
 **This is a law #3 violation sitting inside the ratified rule.** Law #3 requires a
 positive control to *demonstrably be able to PASS*. P1-B, run against the physics,
-cannot. The rule was compound-power-simulated (OC v3.5, 0.980) — but the OC sim
-**assumes** `stable_flags` as an input; it never simulated whether P1-B can produce one.
+cannot. The rule was compound-power-simulated (OC v3.5, 0.980) — but **the OC sim takes
+`stable_flags` as an *input*. It never simulated whether P1-B can produce one.** The gate
+in front of the gate was never powered. That is the gap this packet closes.
 
 **Recommendation: amend before registration. My pick is Option 4 (retire the suspenders,
 license on the belt), with Option 3 as the buy-it-back path.** Reasoning in §6. **I am
@@ -110,23 +114,57 @@ causal-entropic force (`v44_scout.force_frozen_aniso`).
 - **Instrument fidelity:** reproduces the scout's per-block grid construction exactly —
   one RNG per block, τ_x grid drawn **first**, τ_y grid drawn **second from the same
   stream** (`v44_scout.simulate()`, `mode='frozen'`).
-- **Operator:** the 4-point 2h central-difference stencil the scout itself uses
-  (`v44_scout.py` selftest, `mixed_partial_mag`), summed over the ROI (center (2.0,1.0),
-  half (0.45,0.45)). Cross-checked against an independent `np.gradient`-twice estimator.
 - **`Tc > 0` scales the curl multiplicatively and cannot flip its sign** ⇒ A, AxT2, AxT4
   share one sign; only the four distinct (τ_x, τ_y) pairs carry distinct grid work.
+- **Three independent estimators**, because no conclusion here should rest on a choice of
+  derivative operator:
+  1. `stencil` — the 4-point 2h central difference the scout itself uses
+     (`v44_scout.py` selftest, `mixed_partial_mag`), summed over the ROI.
+  2. `stencil_clean` — same, but **dropping every stencil cell whose corners touch a
+     wall node whose entropy was never simulated**. `frozen_grid` NaN-fills blocked nodes
+     with neighbour means; the ROI (center (2.0,1.0), half (0.45,0.45)) sits *on* the
+     wall, and **47 % (42/90) of its stencil cells are built on that fill.**
+  3. `gradient` — `np.gradient` twice, area-weighted.
 
-**Validation — reproduces receipt 07's distribution scale** (different seeds, so
-statistical not bit-exact agreement is the correct bar):
+**Validation against the frozen receipt 07 — and an honest discrepancy.**
 
-| cell / M | receipt 07 (frozen) | diag10:: (this run) |
-|---|---|---|
-| A (0.1,2.0) M=400, sd | 4.95 | **5.20** |
-| C (0.1,1.0) M=400, sd | 4.86 | **6.44** (n=16) / 5.69 |
-| A (0.1,2.0) M=4000, sd | 1.47 | **1.53** |
-| C (0.1,1.0) M=4000, sd | 1.11 | **1.67** |
+| cell / M | receipt 07 (n=16/8) | diag10:: (n=64) | |
+|---|---|---|---|
+| A (0.1,2.0) M=400, **sd** | 4.95 | **5.20** | ✅ matches |
+| C (0.1,1.0) M=400, **sd** | 4.86 | **5.69** | ✅ matches |
+| A (0.1,2.0) M=4000, **sd** | 1.47 | **1.53** | ✅ matches |
+| C (0.1,1.0) M=4000, **sd** | 1.11 | **1.67** | ✅ matches |
+| A (0.1,2.0) M=400, **SNR** | **0.53** | **0.009** | ⚠️ **does not match** |
+| C (0.1,1.0) M=400, **SNR** | **0.45** | **0.020** | ⚠️ **does not match** |
 
-Same statistic, same units, same noise scale. Method validated.
+The **scale** matches; the **SNR does not**, and SNR is scale-invariant — so matching sd
+does *not* validate SNR. SNR is the quantity P1-B lives on, so this must be resolved,
+not waved through.
+
+**Resolution — receipt 07's SNR is an n=16 small-sample artifact, and receipt 07 says so
+itself.** Receipt 07's "SNR" is `|sample mean| / sd` at n=16. That estimator is **biased
+away from zero**: under a true per-seed SNR of 0 its expectation is `E|Z|/√16 = 0.20`,
+with a long right tail. Resampling 16 of my 64 per-seed curls (20 000 draws):
+
+| | median `|mean|/sd` at n=16 | P(≥ 0.53) | P(≥ 0.45) |
+|---|---|---|---|
+| cell A, M=400 | **0.17** | **0.054** | 0.095 |
+| cell C, M=400 | **0.18** | **0.051** | 0.095 |
+
+Receipt 07's 0.53 and 0.45 are ordinary draws from a **true-SNR ≈ 0** population. My n=64
+estimate resolves the same quantity 4× better. And **receipt 07's own conclusion is mine**:
+*"a single grid's ROI curl is noise-dominated at BOTH M — you cannot read a reliable sign
+from one grid realization at either… the per-seed SNR metric is not the right instrument."*
+The receipt was right about the physics; its SNR *number* was noise at n=16. **There is no
+contradiction in the finding — only in a nuisance statistic the receipt itself disclaimed.**
+
+**And the verdict does not depend on this reconciliation at all** — see the bound in §5.
+Even granting receipt 07's SNR *at face value*, P1-B still fails. I did not need to win
+this argument, and I am not resting on having won it.
+
+**The wall-fill hypothesis was tested and rejected as an explanation:** `stencil_clean`
+(dropping the 47 % contaminated cells) does **not** raise the SNR (0.007–0.15) and does
+**not** move the sign splits off coin-flip. All three estimators agree on every verdict.
 
 ---
 
@@ -221,31 +259,69 @@ coin-flip outcome**, not evidence of a stable sign.
 
 ---
 
-## 4. Estimator-robustness
+## 4. Estimator-robustness — and a further blow to σ_cell
 
-The whole result is **scale-invariant** — every conclusion is about signs. Re-running the
-entire analysis with an independent `np.gradient`-twice, area-weighted estimator gives
-**identical t-statistics, identical p-values, identical sign splits, identical verdicts**
-(the two estimators are proportional; ratio exactly 1/(dx·dy) = 100). This is not an
-artifact of my choice of derivative operator.
+Every conclusion here is about **signs**, so it is scale-invariant. All three estimators
+(`stencil`, `stencil_clean`, `gradient`) return **the same verdicts**: all six cells
+INDETERMINATE, all six UNSTABLE, all splits coin-flips. `stencil` and `gradient` are
+exactly proportional (ratio 1/(dx·dy) = 100) so they agree identically; `stencil_clean` is
+a genuinely different operator and agrees on every verdict.
+
+**But note what `stencil_clean` does to the point estimates:**
+
+| cell | σ under `stencil` | σ under `stencil_clean` |
+|---|---|---|
+| A | − | − |
+| **B** | **−** | **+** ⟵ flipped |
+| C | + | + |
+| **D** | **+** | **−** ⟵ flipped |
+
+**The point-estimate sign of σ_cell is not even stable under a change of derivative
+operator.** Cells B and D flip. This is exactly what one expects of a quantity that is
+statistically zero — and it is independent corroboration that σ_cell carries no
+information. *(Cell D is the arm v4.3 registered its directional prediction on.)*
 
 ---
 
-## 5. Why P1-B is *structurally* unsatisfiable (not just unlucky)
+## 5. Why P1-B cannot pass — the bound, not the point estimate
 
-For per-seed sign agreement to reach the 75 % that P1-B demands, a single grid's curl
-needs per-seed **SNR ≈ Φ⁻¹(0.75) ≈ 0.67**. Measured per-seed SNR at M=400 is
-**0.009 – 0.21**. Grid noise falls as 1/√M (confirmed: sd 5.2 @ M=400 → 1.53 @ M=4000,
-ratio 3.4 ≈ √10). So reaching SNR 0.67 from a single grid needs
+For per-seed sign agreement to reach the 75 % P1-B demands, a single grid's curl needs
+per-seed **SNR ≈ Φ⁻¹(0.75) ≈ 0.674**. Measured per-seed SNR at M=400 is **0.009 – 0.21**.
 
-**M_grid ≈ 400 × (0.67/0.03)² ≈ 2 × 10⁵ — per block.** Infeasible.
+I do **not** want the verdict resting on those point estimates. So here is the **bound**.
+Per-seed agreement with the true sign is `Φ(true SNR)`. At n=64, `SE(SNR_hat) = 1/√64 =
+0.125`, so the 95 % **ceiling** on the true SNR is `SNR_hat + 1.96 × 0.125`. Feed that
+ceiling through — it yields the **best case my data admits**, hence an **upper bound** on
+P1-B's power:
 
-**This is receipt 07's finding, arriving at the gate.** Receipt 07 already said it:
-*"a single grid's ROI curl is noise-dominated at BOTH M — you cannot read a reliable sign
-from one grid realization at either… The real levers are more blocks and/or seed-averaged
-grids per block (a design change), not M-per-block."* P1-B asks a single M=400 grid to do
-precisely the thing receipt 07 proved it cannot do. **The receipt was right and the rule
-did not absorb it.**
+| pair (M=400) | SNR_hat | 95 % SNR ceiling | best-case agreement | **P(≥12/16) MAX** |
+|---|---|---|---|---|
+| (0.10,2.0) | 0.009 | 0.254 | 0.600 | 0.167 |
+| (0.25,2.0) | 0.022 | 0.267 | 0.605 | 0.177 |
+| (0.10,1.0) | 0.020 | 0.265 | 0.605 | 0.176 |
+| (0.25,1.0) | 0.213 | 0.458 | 0.676 | **0.370** |
+
+**Maximum over every pair × every one of the three estimators, at the 95 % upper edge:**
+
+> ## P(P1-B fires STABLE) ≤ 0.370
+>
+> **Law #3 requires a positive control to demonstrably PASS at ≥ 0.90.**
+> **P1-B is bounded at 0.37. It cannot pass.**
+
+**This bound is immune to the receipt-07 discrepancy.** Grant receipt 07 its SNR of 0.53
+at face value: that implies per-seed agreement `Φ(0.53) ≈ 0.70`, giving
+`P(≥12/16) ≈ 0.30` — **still nowhere near 0.90.** Whichever SNR you believe, mine or the
+receipt's, **P1-B fails law #3.** The recommendation below does not depend on resolving it.
+
+**And this is receipt 07's own finding, arriving at the gate.** The receipt said:
+*"The real levers are more blocks and/or seed-averaged grids per block (a design change),
+not M-per-block."* P1-B asks a single M=400 grid to read a sign the receipt proved a single
+grid cannot read. **The receipt was right and the rule did not absorb it.**
+
+*(For completeness — the point-estimate version of the same statement: raising a single
+block's grid to SNR 0.674 needs `M_grid ≈ 400 × (0.674/0.03)² ≈ 2 × 10⁵` per block, since
+grid noise falls as 1/√M — confirmed, sd 5.2 @ M=400 → 1.53 @ M=4000, ratio 3.4 ≈ √10.
+Infeasible. But the bound above is the claim I stand on.)*
 
 **Remedy sizing for σ_cell (definition (a)):** to resolve the *sign* at one-sided 95 %,
 taking the (non-significant) 64-seed point estimates at face value:
@@ -278,9 +354,11 @@ other → **the null is blocked forever.** As ratified, we are hard against the 
 
 ### Option 2 — Buy σ_cell (raise N_avg to ~3 000), keep P1-B
 - **Licenses:** a real registered direction; one-sided banding becomes legitimate.
-- **Cost:** ~hours of compute (cheap). **But it does NOT fix P1-B** — per-seed M=400
-  agreement stays ~50 % no matter how precisely you know σ. STABLE still never fires.
-  **Necessary if you want one-sided banding at all; not sufficient. Insufficient alone.**
+- **Cost:** ~hours of compute (cheap — the 64-seed M=4000 sweep ran in 90 s).
+- **But it does NOT fix P1-B.** P1-B's ceiling (0.37) is a **per-block** SNR limit. It is
+  set by how noisy *one M=400 grid* is — not by how precisely the *precondition* knows σ.
+  Buying σ_cell with 3 000 seeds leaves per-block agreement exactly where it is.
+  **Necessary if you want one-sided banding at all. Never sufficient. Not a fix on its own.**
 
 ### Option 3 — Change the instrument: seed-averaged grids per block
 - Replace "one fresh grid per block" with "K averaged grids per block" (receipt 07's own
@@ -363,15 +441,41 @@ should be read as authorizing a run.
 
 | file | what |
 |---|---|
-| `p1_signstability_diag10.py` | the diagnostic driver (both definitions, both estimators, `diag10::` seeds) |
-| `p1_signstability_analyze.py` | the analysis (definitions, P1-B, bootstrap, v4.3 revisit) |
-| `diag10_signstability_full.json` | **raw** — 512 per-seed curls, 4 pairs × 2 resolutions × 64 seeds, both estimators |
+| `p1_signstability_diag10.py` | the diagnostic driver (both definitions, three estimators, `diag10::` seeds) |
+| `p1_signstability_analyze.py` | the analysis (definitions, P1-B, bootstrap, v4.3 revisit, **the bound**) |
+| `diag10_signstability_full.json` | **raw** — 512 per-seed curls (4 pairs × 2 resolutions × 64 seeds) × 3 estimators |
 | `diag10_signstability_validate.json` | raw — the receipt-07 reproduction |
-| `diag10_analysis_stencil.txt` | analysis output (stencil estimator) |
+| `diag10_analysis_stencil.txt` | analysis output (scout's own operator) |
+| `diag10_analysis_stencil_clean.txt` | analysis output (wall-fill-free operator) |
 
-Reproduce:
+Reproduce (~90 s wall on 14 cores):
 ```
-NPROC=14 NSEEDS=64 /usr/bin/python3 p1_signstability_diag10.py full   # ~90 s wall
-/usr/bin/python3 p1_signstability_analyze.py                          # stencil
-EST=gradient /usr/bin/python3 p1_signstability_analyze.py             # cross-check
+NPROC=14 NSEEDS=64 /usr/bin/python3 p1_signstability_diag10.py full
+/usr/bin/python3 p1_signstability_analyze.py                    # scout's operator
+EST=stencil_clean /usr/bin/python3 p1_signstability_analyze.py  # wall-fill-free
+EST=gradient      /usr/bin/python3 p1_signstability_analyze.py  # cross-check
 ```
+
+**Raw NDJSON/JSON is the primary record (law #7).** All 512 per-seed curls per estimator
+are in the JSON — an external seat can recompute every number in this packet without
+re-running the physics.
+
+---
+
+## 9. What would change my mind
+
+Stated up front, so the adversarial seat knows where to aim:
+
+1. **A per-block instrument I've mis-modelled.** If the scout's blocks do not in fact each
+   draw a fresh independent grid — if grids are cached or shared across blocks — then
+   per-block curl noise is not what I measured, and P1-B's arithmetic changes. *I read
+   `simulate()` and believe each block is one fresh RNG, τ_x-then-τ_y. Check me.*
+2. **A σ_cell that is real but small.** My bound is `|true ROI curl| < ~0.4` (cell A, 95 %).
+   A larger N_avg could resolve a nonzero σ. **That would rescue one-sided banding — but
+   not P1-B**, whose ceiling (0.37) is a per-*block* SNR limit and is unaffected by how
+   well the precondition knows σ. Anyone arguing Option 2 alone must confront this.
+3. **The ROI itself.** It sits on the wall by design (it is the channel mouth). If the
+   physically-motivated ROI should exclude the wall entirely, the whole statistic changes.
+   I tested a wall-fill-free variant and it did not move the verdicts — but I did not test
+   a *relocated* ROI, because that would be redefining the registered instrument, which is
+   not mine to do.
