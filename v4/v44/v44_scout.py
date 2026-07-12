@@ -89,7 +89,7 @@ USAGE:
   python v43_harness.py --analyze F.ndjson   # registered verdict
 """
 
-import sys, json, math, time, hashlib, warnings
+import sys, os, json, math, time, hashlib, warnings
 warnings.filterwarnings('ignore')
 import numpy as np
 
@@ -671,14 +671,451 @@ def _detection_floor(sd_block, B, alpha, power):
     """Smallest |delta| detectable at given alpha with given power."""
     return (_inv_norm(1 - alpha) + _inv_norm(power)) * sd_block * math.sqrt(2.0 / B)
 
+# ============================================================================
+# v4.4 SCOUT DECISION RULE v3.5 -- EXECUTABLE ENCODING
+# ============================================================================
+# Ratified by Anthony 2026-07-08 (RATIFICATION_v3.5.md). Governing text:
+# v44_scout_DECISION_RULE_v3.5.md. Where that prose and any older pseudocode
+# disagree, THE RATIFIED v3.5 PROSE WINS.
+#
+# ADDITIVE PATH. Nothing below is read by the v4.3 gates (C0 / occupancy /
+# fpt / G1 vortex / G2 aniso / G3 / G4). CFG is NOT touched, so config_hash
+# is unchanged (a344d6c47c8a22c1) and --analyze on a v4.3 NDJSON is
+# bit-identical to the pre-change harness. These constants are CODE and are
+# therefore covered by SOURCE_SHA, which changes -- forcing a prereg re-issue
+# at registration (law #1; Anthony's gate, NOT performed here).
+#
+# STILL A REGISTRATION-TIME CFG CHANGE, FLAGGED AND NOT MADE (rule doc sec 10):
+#   CFG["scout"]["blocks"]  8 -> 16   (decision D2)
+#   CFG["scout"]["n_rerun"] absent -> 56   (sec 8 / sec 8-Omega powered rerun)
+# Both change config_hash. Anthony's gate.
+
+CEILING = "INCONCLUSIVE_AT_CEILING"          # terminal label (Q4). NEVER a null.
+BANDS = ("GREEN", "AMBER", "RED", "ANOMALOUS")
+BAND_VOCAB = frozenset(BANDS + (CEILING,))
+
+RULE = {
+    "rule_version": "v3.5",
+    "ratified": "2026-07-08",
+    # --- sec 0.1 detection floor: floor(B, sd) = Z * sd * sqrt(2/B) ---
+    "Z": 3.858,                    # z_{0.995} + z_{0.90}
+    "alpha": 0.05,
+    # --- sec 2.1 honest SE: sd * sqrt(1/B_scout + 1/64) -- folds in the
+    #     v4.3 64-block equal-arm reference (reference-uncertain, marginal) ---
+    "ref_blocks": 64,
+    # --- sec 4 shared ladder: 16b/B96 -> 32b/B96 -> 32b/B128 -> INCONCLUSIVE ---
+    "blocks_first": 16,            # D2 (CFG["scout"]["blocks"] 8->16 at registration)
+    "blocks_extended": 32,
+    "B_conf": 96,                  # D4
+    "B_max": 128,                  # declared compute ceiling (fork 7)
+    "n_rerun": 56,                 # sec 8 / sec 8-Omega powered STATE-B rerun [v3.5]
+    # --- sec 2.2 frozen Student-t convention (alpha = 0.05) ---
+    "t_one_sided": {7: 1.895, 15: 1.753, 31: 1.696, 55: 1.673},
+    "t_two_sided": {7: 2.365, 15: 2.131, 31: 2.040, 55: 2.004},
+    # --- sec 3.3 sd_upper = sd * sqrt((n-1)/chi2_{0.05,n-1}) ---
+    "chi2_upper": {7: 1.797, 15: 1.437, 31: 1.268},
+    # --- sec 2.3 exact thresholds table (units of sd_cell) -- the law-#4
+    #     grep targets: every one of these is re-derived and grep-checked
+    #     against the ratified prose in _rule_selftest(). ---
+    "floor_64": 0.682, "floor_96": 0.557, "floor_128": 0.482,
+    "se_8_96": 0.375, "se_16_96": 0.2795, "se_32_96": 0.2165, "se_56": 0.1830,
+    "green_16_96_1s": 1.047, "green_16_96_2s": 1.153,
+    "kappa_16_96_1s": 0.067,       # OPERATIVE frozen RED: |mu| < 0.067*sd
+    "kappa_16_96_2s": -0.039,      # < 0 -> two-sided RED UNREACHABLE at 16b
+    "kappa_32_96_1s": 0.190, "kappa_32_96_2s": 0.115,
+    "kappa_32_128_1s": 0.115,
+    "rerun_edge": 0.306,           # |x| > t55 * SE56  [v3.5]
+    "kappa_56": 0.251,             # floor(96) - rerun_edge  [v3.5]
+    "rerun_power": 0.913,          # honest noncentral-t at -+1x floor(96) [v3.5]
+    "compound_power_target": 0.90, # law #3: COMPOUND gate MC, not analytic
+}
+
+def _t_star(df, two_sided):
+    """sec 2.2 frozen convention. Unregistered df is a registration error --
+    the rule fires only at rungs it froze thresholds for."""
+    tab = RULE["t_two_sided"] if two_sided else RULE["t_one_sided"]
+    if df not in tab:
+        raise ValueError("no frozen t* for df=%r (rule sec 2.2)" % (df,))
+    return tab[df]
+
+def _chi2_upper_factor(df):
+    """sec 3.3 sd_upper factor sqrt((n-1)/chi2_{0.05,n-1})."""
+    tab = RULE["chi2_upper"]
+    if df not in tab:
+        raise ValueError("no frozen chi2 upper factor for df=%r (rule sec 3.3)" % (df,))
+    return tab[df]
+
+def rule_floor(sd, B_conf):
+    """sec 0.1 two-arm minimum-detectable-effect."""
+    return RULE["Z"] * sd * math.sqrt(2.0 / B_conf)
+
+def rule_se(sd, n_blocks):
+    """sec 2.1 honest SE -- folds in the 64-block equal-arm reference."""
+    return sd * math.sqrt(1.0 / n_blocks + 1.0 / RULE["ref_blocks"])
+
+def band_cell(mu_hat, sd_cell, n_blocks, B_conf, sigma_cell, stable_cell=None):
+    """sec 3: band ONE scout cell on ONE statistic.
+
+    Called for quad_loop_rate (sigma from P1-A), omega_roi (sigma from
+    P1-A(omega)) and occupancy_x (ALWAYS two-sided -- sigma_cell=None, D1'').
+    Returns (band, bound, floor_c); band in BANDS. CEILING is set by the
+    caller's terminal ladder (sec 4), never here.
+
+    sigma_cell in {+1, -1, None}; None => two-sided (P1 INDETERMINATE).
+    stable_cell is NOT consumed here -- it is consumed at the pivot (sec 5 ii);
+    the parameter is retained to match the ratified sec-7 interface.
+
+    THE PARTITION IS COMPLETE: GREEN | ANOMALOUS | RED | AMBER, in that
+    priority. RED carries the sec-3.3 ROBUSTNESS CONJUNCTION -- it must bound
+    under BOTH the point sd AND the coupled upper-CI sd, on BOTH the aligned
+    statistic x (v3.1) AND the magnitude |mu| (v3.2 belt).
+    """
+    if not (sd_cell > 0):
+        raise ValueError("sd_cell must be > 0 (got %r) -- data integrity" % (sd_cell,))
+    df = n_blocks - 1
+    two_sided = (sigma_cell is None)
+    t = _t_star(df, two_sided)
+    sd_up = sd_cell * _chi2_upper_factor(df)
+
+    f_c = rule_floor(sd_cell, B_conf)
+    f_u = rule_floor(sd_up, B_conf)
+    se_c = rule_se(sd_cell, n_blocks)
+    se_u = rule_se(sd_up, n_blocks)
+
+    x = abs(mu_hat) if two_sided else sigma_cell * mu_hat   # prediction-aligned
+
+    if x - t * se_c > f_c:
+        return ("GREEN", x - t * se_c, f_c)
+
+    # ANOMALOUS keys on significance against 0 (Finding-4 correction).
+    # Does NOT apply two-sided (no registered direction to oppose).
+    if (not two_sided) and (x < -t * se_c):
+        return ("ANOMALOUS", x - t * se_c, f_c)
+
+    aligned = (x + t * se_c < f_c) and (x + t * se_u < f_u)          # v3.1, verbatim
+    magnitude = (abs(mu_hat) + t * se_c < f_c) and \
+                (abs(mu_hat) + t * se_u < f_u)                        # v3.2 belt
+    if aligned and magnitude:
+        return ("RED", abs(mu_hat) + t * se_c, f_c)
+
+    return ("AMBER", x + t * se_c, f_c)
+
+def ladder_terminal(primary_blocks, omega_blocks, occupancy_blocks,
+                    sigma_primary, sigma_omega):
+    """sec 4: the SHARED terminal ladder, and the ONLY place CEILING is set.
+
+        16b/B96  ->  32b/B96  ->  32b/B128  ->  INCONCLUSIVE_AT_CEILING
+
+    *** THE LADDER TERMINATES IN INCONCLUSIVE. NOT IN A NULL. ***
+    v3's "RED-at-ceiling" was the BLOCKED defect: a compute ceiling cannot
+    mint evidence of absence. An unresolved statistic at B_max is CEILING,
+    which BLOCKS the pivot (sec 5 (0'), primary or omega on a gating cell).
+
+    Driven by the primary OR omega_roi (the D1 look-axis repair): the cell
+    extends while EITHER is AMBER. A primary GREEN/ANOMALOUS short-circuits
+    (outcome 1 / sec 8 preempt). occupancy_x does NOT drive the ladder
+    (documented D1'' asymmetry, Anthony's fork 12) -- it is stamped at
+    whatever rung the cell terminates on, and a terminal occupancy AMBER is
+    recorded + caveated, NEVER laddered further and NEVER CEILING.
+
+    ALL THREE statistics are stamped at the cell's SINGLE terminal rung
+    (couple 7: the sim and analyze() share this one code path).
+
+    32-block rungs are ACCUMULATION (first 16 + 16 more), not a redraw; the
+    B96->B128 escalation re-bands the SAME 32-block sample.
+
+    occupancy_blocks may be None -- the per-block occupancy SCALAR is NOT
+    defined by the ratified rule (see OCC_REDUCTION_GAP). Then the occupancy
+    band is None and no pivot may be licensed.
+
+    Returns a dict. If the data cannot supply the rung the ladder demands,
+    status is EXTENSION_REQUIRED and NO band is stamped -- the analysis path
+    never fabricates blocks it does not have.
+    """
+    rungs = [(RULE["blocks_first"], RULE["B_conf"]),
+             (RULE["blocks_extended"], RULE["B_conf"]),
+             (RULE["blocks_extended"], RULE["B_max"])]
+
+    def stamp(series, n, B_conf, sigma):
+        v = np.asarray(series[:n], dtype=float)
+        return band_cell(float(v.mean()), float(v.std(ddof=1)), n, B_conf, sigma)
+
+    for idx, (n, B_conf) in enumerate(rungs):
+        have = len(primary_blocks)
+        if have < n:
+            return {"status": "EXTENSION_REQUIRED", "need_blocks": n,
+                    "have_blocks": have, "rung": None,
+                    "primary": None, "omega": None, "occupancy": None}
+        pb, p_bound, p_floor = stamp(primary_blocks, n, B_conf, sigma_primary)
+        wb, w_bound, w_floor = stamp(omega_blocks, n, B_conf, sigma_omega)
+        if occupancy_blocks is None:
+            cb = None
+        else:
+            cb = stamp(occupancy_blocks, n, B_conf, None)[0]   # ALWAYS two-sided
+
+        last = (idx == len(rungs) - 1)
+        short_circuit = pb in ("GREEN", "ANOMALOUS")
+
+        if last and not short_circuit:
+            # compute ceiling: whichever LADDERED statistic is still AMBER is
+            # INCONCLUSIVE. It is not RED. It never becomes RED. It blocks.
+            if pb == "AMBER":
+                pb = CEILING
+            if wb == "AMBER":
+                wb = CEILING
+        elif not short_circuit and (pb == "AMBER" or wb == "AMBER"):
+            continue                                   # extend to the next rung
+
+        return {"status": "TERMINAL", "rung": {"n_blocks": n, "B_conf": B_conf},
+                "short_circuit": bool(short_circuit),
+                "primary": pb, "omega": wb, "occupancy": cb,
+                "primary_floor": p_floor, "omega_floor": w_floor}
+    raise AssertionError("unreachable: the ladder must terminate")
+
+def pivot_licensed(gating_bands, stable_flags, omega_bands, occupancy_bands,
+                   descriptive_bands,
+                   REGISTERED_GATING_ROSTER, REGISTERED_FULL_ROSTER):
+    """sec 5: pivot to the closed no-reset NESS protocol iff ALL conditions hold.
+
+    Returns (licensed: bool, reason: str). Guarded against: vacuous truth
+    (all([]) is True), compute-ceiling-minted absence (primary AND omega),
+    wrong-sign magnitude leak (belt + STABLE suspenders), statistic-projection
+    null (omega veto at the shared-ladder look + occupancy GREEN-veto), and
+    shrunk-denominator null on EVERY consumed dict (full-roster completeness).
+
+    ORDER IS THE RATIFIED PROSE ORDER: THE ANOMALY GUARD RUNS FIRST. An open
+    ANOMALOUS anywhere blocks ANY terminal-null decision before a single
+    all()/any() over a possibly-empty or silently-shrunken set can run.
+    """
+    GATING = set(REGISTERED_GATING_ROSTER)
+    FULL = set(REGISTERED_FULL_ROSTER)
+    DEMOTED = FULL - GATING
+
+    # ---- (0) ANOMALY GUARD -- FIRST CHECK. An open ANOMALOUS cell blocks any
+    #      terminal-null decision (sec 5 outcome 3). Exit from ANOMALOUS only
+    #      via the POWERED sec-8 / sec-8-Omega machine (n_rerun = 56).
+    for name, d in (("gating", gating_bands), ("descriptive", descriptive_bands),
+                    ("omega", omega_bands)):
+        for c, b in d.items():
+            if b == "ANOMALOUS":
+                return (False, "open ANOMALOUS in %s_bands at cell %r "
+                               "(powered sec-8 disposition required)" % (name, c))
+
+    # ---- band vocabulary: an unknown label is a registration-integrity fault,
+    #      never a silently-not-RED cell.
+    for name, d in (("gating", gating_bands), ("omega", omega_bands),
+                    ("occupancy", occupancy_bands), ("descriptive", descriptive_bands)):
+        for c, b in d.items():
+            if b not in BAND_VOCAB:
+                return (False, "unknown band %r in %s_bands at cell %r" % (b, name, c))
+
+    # ---- (iv) roster assertion + (v) FULL-ROSTER COMPLETENESS on EVERY
+    #      consumed dict. A silently-dropped or extra cell in ANY dict can
+    #      never shrink the claim.  <- this is what kills 5-RED + 1-ANOMALOUS
+    #      re-shaped as a 5-key gating dict.
+    if not GATING <= FULL:
+        return (False, "gating roster is not a subset of the full roster")
+    if set(gating_bands.keys()) != GATING:
+        return (False, "gating_bands keys != REGISTERED_GATING_ROSTER")
+    if set(omega_bands.keys()) != FULL:
+        return (False, "omega_bands keys != REGISTERED_FULL_ROSTER")
+    if set(occupancy_bands.keys()) != FULL:
+        return (False, "occupancy_bands keys != REGISTERED_FULL_ROSTER")
+    if set(descriptive_bands.keys()) != DEMOTED:
+        return (False, "descriptive_bands keys != FULL - GATING")
+    if not gating_bands:
+        return (False, "empty gating roster -- nothing bounds the space "
+                       "(vacuous-truth guard)")
+
+    # ---- (0') NO CEILING-MINTED ABSENCE (Q4). Primary OR omega unresolved on
+    #      a GATING cell blocks. The ladder ends in INCONCLUSIVE, and
+    #      INCONCLUSIVE is not evidence of absence.
+    for c in GATING:
+        if gating_bands[c] == CEILING:
+            return (False, "primary %s at gating cell %r" % (CEILING, c))
+        if omega_bands[c] == CEILING:
+            return (False, "omega %s at gating cell %r (unresolved secondary)" % (CEILING, c))
+    # (a DEMOTED cell's omega CEILING is recorded + caveated, non-blocking.)
+
+    # ---- (iii) OMEGA VETO (statistic axis), full roster: GREEN anywhere blocks.
+    #      (ANOMALOUS anywhere already blocked at the anomaly guard.)
+    for c, b in omega_bands.items():
+        if b == "GREEN":
+            return (False, "omega veto: omega GREEN at cell %r" % (c,))
+
+    # ---- (iii') OCCUPANCY VETO (recorded-statistic axis), full roster,
+    #      two-sided: GREEN anywhere blocks. Terminal occupancy AMBER does NOT
+    #      block but MUST appear in the claim caveat (sec 2.1).
+    for c, b in occupancy_bands.items():
+        if b == "GREEN":
+            return (False, "occupancy veto: occupancy GREEN at cell %r" % (c,))
+
+    # ---- demoted-cell primary dispositions (sec 1.2 clause 3): a demoted GREEN
+    #      forces outcome 1.
+    for c, b in descriptive_bands.items():
+        if b == "GREEN":
+            return (False, "demoted-cell primary GREEN at cell %r (outcome 1)" % (c,))
+
+    # ---- outcome-1 guard: a primary GREEN on any gating cell -> register the
+    #      Movement-3 contrast there instead of pivoting.
+    for c, b in gating_bands.items():
+        if b == "GREEN":
+            return (False, "primary GREEN at gating cell %r (outcome 1)" % (c,))
+
+    # ---- (i) TERMINAL-BAND CONDITION: every gating cell actual RED.
+    for c, b in gating_bands.items():
+        if b != "RED":
+            return (False, "gating cell %r is %s, not RED" % (c, b))
+
+    # ---- (ii) SUSPENDERS: every counted RED sits on a STABLE cell.
+    for c, b in gating_bands.items():
+        if b == "RED" and not stable_flags.get(c, False):
+            return (False, "UNSTABLE cell %r cannot license a RED pivot" % (c,))
+
+    return (True, "all-RED pivot licensed over the registered gating roster")
+
+# --- THE OCCUPANCY SCALAR GAP (reported, NOT silently patched) --------------
+# The ratified rule bands `occupancy_x` as a per-block SCALAR (two-sided,
+# sec 3 / D1''). The harness records occupancy_x as a 24-bin HISTOGRAM per
+# block (pilot_pair, run_chamber). NO per-block scalar reduction is defined in
+# the ratified text, in prereg_v44.json, or in the OC sims (which model
+# Delta_occ abstractly in sd units). So the occupancy veto -- a pivot
+# PRECONDITION -- cannot be evaluated on a real NDJSON until Anthony registers
+# a reduction. This path therefore REFUSES to stamp an occupancy band by
+# default and WITHHOLDS the pivot decision, rather than inventing an estimand.
+OCC_REDUCTION_GAP = ("occupancy_x per-block scalar reduction is NOT registered "
+                     "(rule bands a scalar; harness records a 24-bin histogram)")
+
+def _occ_lr_asymmetry(hist):
+    """HQ-PROPOSED CANDIDATE, NOT RATIFIED, NOT REGISTERED. Signed left/right
+    mass asymmetry of the 24-bin occupancy histogram. Selectable ONLY via an
+    explicit --occ-reduction flag, and the choice is stamped in the report."""
+    v = np.asarray(hist, dtype=float)
+    tot = v.sum()
+    if tot <= 0:
+        raise ValueError("empty occupancy histogram")
+    h = len(v) // 2
+    return float((v[h:].sum() - v[:h].sum()) / tot)
+
+OCC_REDUCTIONS = {"lr_asymmetry": _occ_lr_asymmetry}
+
+def scout_outcome(gating_bands, omega_bands, occupancy_bands, descriptive_bands,
+                  stable_flags, GATING, FULL):
+    """sec 5: exactly ONE of the four honest terminal outcomes."""
+    licensed, reason = pivot_licensed(gating_bands, stable_flags, omega_bands,
+                                      occupancy_bands, descriptive_bands, GATING, FULL)
+    if licensed:
+        return ("PIVOT_ALL_RED", reason, licensed)
+    anom = [c for d in (gating_bands, descriptive_bands, omega_bands)
+            for c, b in d.items() if b == "ANOMALOUS"]
+    veto = [c for c, b in omega_bands.items() if b == "GREEN"] + \
+           [c for c, b in occupancy_bands.items() if b == "GREEN"]
+    if anom or veto:
+        return ("INVESTIGATE_FLAG", reason, licensed)
+    green = [c for d in (gating_bands, descriptive_bands)
+             for c, b in d.items() if b == "GREEN"]
+    if green:
+        return ("GREEN_CANDIDATE", reason, licensed)
+    if any(gating_bands.get(c) == CEILING or omega_bands.get(c) == CEILING
+           for c in GATING):
+        return ("INCONCLUSIVE_AT_COMPUTE_CEILING", reason, licensed)
+    return ("BLOCKED", reason, licensed)
+
+def scout_report(scout_rows, opts):
+    """Additive v4.4 path: run the RATIFIED v3.5 decision rule over a scout
+    NDJSON. Prints ONE json object. Never touches the v4.3 gates.
+
+    Preconditions P1 (sigma_cell, sigma^omega_cell, STABLE) and P2 (the
+    registered gating + full rosters) are NOT in the NDJSON. Without a
+    registered --p1 file the bands are still stamped, but the DECISION IS
+    WITHHELD: no license may be emitted over unregistered preconditions
+    (rule sec 1.1 / sec 1.2, law #1).
+    """
+    p1 = json.load(open(opts["p1"])) if opts.get("p1") else None
+    occ_fn = OCC_REDUCTIONS.get(opts.get("occ_reduction") or "")
+    cells = {}
+    for d in scout_rows:
+        cells.setdefault(d["cell"], []).append(d)
+    rep = {"rule_version": RULE["rule_version"], "version": VERSION,
+           "config_hash": config_hash(), "source_sha": SOURCE_SHA,
+           "n_scout_blocks": len(scout_rows), "cells": {}}
+    withheld = []
+    if p1 is None:
+        withheld.append("P1/P2 not supplied (--p1): sigma_cell, sigma^omega_cell, "
+                        "STABLE and the registered rosters are unregistered")
+    if occ_fn is None:
+        withheld.append(OCC_REDUCTION_GAP)
+    for label in sorted(cells):
+        blocks = sorted(cells[label], key=lambda r: r["block"])
+        q = [b["quad_loop_rate"] for b in blocks]
+        w = [b["omega_roi"] for b in blocks]
+        c = [occ_fn(b["occupancy_x"]) for b in blocks] if occ_fn else None
+        sg = (p1 or {}).get(label, {})
+        term = ladder_terminal(q, w, c, sg.get("sigma_cell"), sg.get("sigma_omega_cell"))
+        term["n_blocks_available"] = len(q)
+        rep["cells"][label] = term
+    rep["decision"] = {"emitted": False, "withheld_because": withheld}
+    if not withheld:
+        GATING = frozenset(p1["__gating_roster__"])
+        FULL = frozenset(p1["__full_roster__"])
+        gb = {c: rep["cells"][c]["primary"] for c in GATING}
+        ob = {c: rep["cells"][c]["omega"] for c in FULL}
+        cb = {c: rep["cells"][c]["occupancy"] for c in FULL}
+        db = {c: rep["cells"][c]["primary"] for c in (FULL - GATING)}
+        st = {c: bool(p1[c].get("stable")) for c in GATING}
+        outcome, reason, lic = scout_outcome(gb, ob, cb, db, st, GATING, FULL)
+        # EVERY blocking condition is reported, not just the first one hit --
+        # an operator must never read a single short-circuit reason as if it
+        # were the only thing standing between the run and a pivot.
+        flags = {
+            "primary_ANOMALOUS": sorted(c for d in (gb, db) for c, b in d.items()
+                                        if b == "ANOMALOUS"),
+            "omega_ANOMALOUS": sorted(c for c, b in ob.items() if b == "ANOMALOUS"),
+            "omega_GREEN_veto": sorted(c for c, b in ob.items() if b == "GREEN"),
+            "occupancy_GREEN_veto": sorted(c for c, b in cb.items() if b == "GREEN"),
+            "primary_GREEN": sorted(c for d in (gb, db) for c, b in d.items()
+                                    if b == "GREEN"),
+            "primary_at_ceiling_gating": sorted(c for c in GATING if gb[c] == CEILING),
+            "omega_at_ceiling_gating": sorted(c for c in GATING if ob[c] == CEILING),
+            "omega_at_ceiling_demoted_caveat": sorted(c for c in (FULL - GATING)
+                                                      if ob[c] == CEILING),
+            "occupancy_AMBER_mandatory_caveat": sorted(c for c, b in cb.items()
+                                                       if b == "AMBER"),
+            "UNSTABLE_gating": sorted(c for c in GATING if not st[c]),
+        }
+        rep["decision"] = {"emitted": True, "outcome": outcome,
+                           "pivot_licensed": lic, "first_blocking_reason": reason,
+                           "flags": {k: v for k, v in flags.items() if v},
+                           "occ_reduction": opts.get("occ_reduction")}
+    print(json.dumps(rep, indent=1))
+    return rep
+
+def _scout_opts(args):
+    o = {}
+    if "--p1" in args:
+        o["p1"] = args[args.index("--p1") + 1]
+    if "--occ-reduction" in args:
+        o["occ_reduction"] = args[args.index("--occ-reduction") + 1]
+    return o
+
 def analyze(args):
     th = CFG["thresholds"]; sw = CFG["sweeps"]; pw = CFG["power"]
     rows = {}
+    scout_rows = []
     for line in open(args[0]):
         if line.strip().startswith("{"):
             d = json.loads(line)
             if d.get("type") == "result":
                 rows[d["unit"]] = d
+            elif d.get("type") == "scout":
+                scout_rows.append(d)
+    # ADDITIVE v4.4 PATH. A scout-only NDJSON has no v4.3 units at all (the
+    # old code raised KeyError on it); route it to the ratified decision rule.
+    # A v4.3 NDJSON with no scout rows takes the untouched path below and its
+    # output is bit-identical to the pre-change harness.
+    if not rows:
+        scout_report(scout_rows, _scout_opts(args))
+        return
     rep = {"version": VERSION, "config_hash": config_hash(),
            "n_units": len(rows)}
     t = sw["matched_tau"]; M = sw["matched_M"]; B = sw["matched_blocks"]
@@ -766,6 +1203,10 @@ def analyze(args):
     rep["G3_bounded_null"] = bool(G1 and not G2)
     rep["G4_inconclusive"] = bool(not G1)
     print(json.dumps(rep, indent=1))
+    # ADDITIVE: a mixed NDJSON (v4.3 units + v4.4 scout blocks) gets the scout
+    # decision printed as a SEPARATE object, after the untouched v4.3 report.
+    if scout_rows:
+        scout_report(scout_rows, _scout_opts(args))
 
 def occ_chi2_stat(A, B):
     pa = np.mean(A, axis=0); pb = np.mean(B, axis=0)
@@ -917,13 +1358,246 @@ def selftest():
                f"{th_cfg['sign_consistency_aniso']}/{sw['aniso_blocks']}"]  # 48/64 aniso
     ok_grep = all(r in _src for r in _ratios)
     print(f"# prose/config grep-check: CFG ratios {_ratios} present -> {'PASS' if ok_grep else 'FAIL'}")
+    # NEW (v4.4): the ratified decision-rule v3.5 selftest (laws #2/#3/#4).
+    print("# --- v4.4 decision rule v3.5 selftest ---")
+    ok_rule = _rule_selftest()
     allok = (ok_gyr and ok_fpt and ok_fields and ok_quadsynth and ok_vortex
-             and ok_gate and ok_power and ok_consist and ok_curl and ok_g2gate and ok_grep)
+             and ok_gate and ok_power and ok_consist and ok_curl and ok_g2gate
+             and ok_grep and ok_rule)
     print(f"# gyr:{ok_gyr} fpt:{ok_fpt} fields:{ok_fields} quad_synth:{ok_quadsynth} "
           f"vortex_sign:{ok_vortex} occ_gate:{ok_gate} power:{ok_power} "
           f"aniso_consist:{ok_consist} aniso_curl:{ok_curl} g2_gate:{ok_g2gate} "
-          f"grep:{ok_grep} | {round(time.time()-t0,1)}s")
+          f"grep:{ok_grep} rule_v35:{ok_rule} | {round(time.time()-t0,1)}s")
     print("# SELFTEST " + ("PASS" if allok else "FAIL"))
+
+def _rule_selftest():
+    """v4.4 decision-rule v3.5 selftest.
+
+    LAW #2 -- the gate must demonstrably be able to FAIL on null/adversarial
+    data. LAW #3 -- and demonstrably be able to PASS on true signal.
+    LAW #4 -- every prose threshold is grepped against the frozen constants.
+    """
+    ok = True
+    def check(name, got, want):
+        nonlocal ok
+        good = (got == want)
+        ok = ok and good
+        print("#   [%s] %-46s got=%-5s want=%-5s" %
+              ("PASS" if good else "FAIL", name, got, want))
+        return good
+
+    R = RULE
+    ALL = frozenset(["A", "B", "C", "D", "AxT2", "AxT4"])
+    GAT = ALL                     # no-demotion case
+    def lic(gb, st=None, ob=None, cb=None, db=None, G=GAT, F=ALL):
+        st = {c: True for c in G} if st is None else st
+        ob = {c: "RED" for c in F} if ob is None else ob
+        cb = {c: "AMBER" for c in F} if cb is None else cb
+        db = {} if db is None else db
+        return pivot_licensed(gb, st, ob, cb, db, G, F)[0]
+
+    print("# --- pivot_licensed() CAN FAIL (law #2) ---")
+    check("empty band set (vacuous truth, all([])==True)",
+          lic({}, st={}, G=frozenset(), F=frozenset()), False)
+    check("empty gating dict vs registered roster",
+          lic({}), False)
+    check("all six ANOMALOUS", lic({c: "ANOMALOUS" for c in GAT}), False)
+    check("one GREEN, five RED",
+          lic(dict({c: "RED" for c in GAT}, **{"C": "GREEN"})), False)
+    check("one AMBER, five RED",
+          lic(dict({c: "RED" for c in GAT}, **{"C": "AMBER"})), False)
+    check("five RED + one ANOMALOUS (6-key dict)",
+          lic(dict({c: "RED" for c in GAT}, **{"AxT4": "ANOMALOUS"})), False)
+    # the REAL vacuous-truth shape: the ANOMALOUS cell is silently dropped, so
+    # all(b == "RED") is True over the survivors. The roster assertion kills it.
+    check("five RED, ANOMALOUS cell SILENTLY DROPPED (shrunk denominator)",
+          lic({c: "RED" for c in GAT if c != "AxT4"}), False)
+    check("all RED but one cell UNSTABLE",
+          lic({c: "RED" for c in GAT},
+              st=dict({c: True for c in GAT}, **{"B": False})), False)
+    check("primary INCONCLUSIVE_AT_CEILING on a gating cell",
+          lic(dict({c: "RED" for c in GAT}, **{"A": CEILING})), False)
+    check("omega INCONCLUSIVE_AT_CEILING on a gating cell",
+          lic({c: "RED" for c in GAT},
+              ob=dict({c: "RED" for c in ALL}, **{"A": CEILING})), False)
+    check("omega GREEN (veto)",
+          lic({c: "RED" for c in GAT},
+              ob=dict({c: "RED" for c in ALL}, **{"D": "GREEN"})), False)
+    check("omega ANOMALOUS (veto)",
+          lic({c: "RED" for c in GAT},
+              ob=dict({c: "RED" for c in ALL}, **{"D": "ANOMALOUS"})), False)
+    check("occupancy GREEN (veto)",
+          lic({c: "RED" for c in GAT},
+              cb=dict({c: "AMBER" for c in ALL}, **{"C": "GREEN"})), False)
+    check("omega_bands MISSING a key (dict-denominator leak)",
+          lic({c: "RED" for c in GAT},
+              ob={c: "RED" for c in ALL if c != "AxT4"}), False)
+    check("occupancy_bands MISSING a key",
+          lic({c: "RED" for c in GAT},
+              cb={c: "AMBER" for c in ALL if c != "AxT4"}), False)
+    check("omega_bands EXTRA key",
+          lic({c: "RED" for c in GAT},
+              ob=dict({c: "RED" for c in ALL}, **{"ZZZ": "RED"})), False)
+    check("unknown band label", lic(dict({c: "RED" for c in GAT}, **{"A": "REDDISH"})), False)
+    # demotion: AxT4 demoted -> gating roster is 5, descriptive must be exactly {AxT4}
+    G5 = frozenset(ALL - {"AxT4"})
+    check("demoted cell absent from descriptive_bands (S9-d)",
+          lic({c: "RED" for c in G5}, st={c: True for c in G5},
+              db={}, G=G5), False)
+    check("demoted-cell primary GREEN forces outcome 1",
+          lic({c: "RED" for c in G5}, st={c: True for c in G5},
+              db={"AxT4": "GREEN"}, G=G5), False)
+    check("occupancy GREEN at a DEMOTED cell still vetoes",
+          lic({c: "RED" for c in G5}, st={c: True for c in G5},
+              cb=dict({c: "AMBER" for c in ALL}, **{"AxT4": "GREEN"}),
+              db={"AxT4": "RED"}, G=G5), False)
+
+    print("# --- pivot_licensed() CAN PASS (law #3) ---")
+    check("all-RED + all-STABLE, omega RED, occupancy AMBER",
+          lic({c: "RED" for c in GAT}), True)
+    check("all-RED + STABLE with AxT4 demoted (claim shrinks, still licensed)",
+          lic({c: "RED" for c in G5}, st={c: True for c in G5},
+              db={"AxT4": "RED"}, G=G5), True)
+    check("omega CEILING on a DEMOTED cell only -> non-blocking",
+          lic({c: "RED" for c in G5}, st={c: True for c in G5},
+              ob=dict({c: "RED" for c in ALL}, **{"AxT4": CEILING}),
+              db={"AxT4": "RED"}, G=G5), True)
+
+    print("# --- band_cell() cutpoints (sec 2.3 / sec 3) ---")
+    sd, n, B = 1.0, 16, 96
+    f96 = rule_floor(sd, B); se16 = rule_se(sd, n); t15 = R["t_one_sided"][15]
+    check("GREEN just above floor + t*SE",
+          band_cell(f96 + t15 * se16 + 1e-9, sd, n, B, +1)[0], "GREEN")
+    check("AMBER just below the GREEN edge",
+          band_cell(f96 + t15 * se16 - 1e-9, sd, n, B, +1)[0], "AMBER")
+    check("RED just inside kappa_16 = 0.067",
+          band_cell(R["kappa_16_96_1s"] - 1e-3, sd, n, B, +1)[0], "RED")
+    check("AMBER just outside kappa_16",
+          band_cell(f96 - t15 * se16 + 1e-6, sd, n, B, +1)[0], "AMBER")
+    check("wrong-sign at floor magnitude is NOT RED (v3.2 belt)",
+          band_cell(-f96, sd, n, B, +1)[0] == "RED", False)
+    check("ANOMALOUS: significant wrong-sign",
+          band_cell(-(t15 * se16 + 1e-6), sd, n, B, +1)[0], "ANOMALOUS")
+    check("two-sided RED UNREACHABLE at 16b (kappa_2s < 0)",
+          any(band_cell(m, sd, n, B, None)[0] == "RED"
+              for m in np.linspace(-0.05, 0.05, 41)), False)
+    check("two-sided RED reachable at 32b",
+          band_cell(0.05, sd, 32, B, None)[0], "RED")
+    check("occupancy is banded two-sided: GREEN on |mu| with mu < 0",
+          band_cell(-(f96 + R["t_two_sided"][15] * se16 + 1e-3), sd, n, B, None)[0], "GREEN")
+
+    print("# --- sec 4 shared ladder: terminates in INCONCLUSIVE, never in a null ---")
+    rng = np.random.default_rng(20260712)
+    null32 = list(rng.normal(0.0, 1.0, 32))
+    amber = [0.30 + 1e-9 * i for i in range(32)]          # sd~0 guard -> use noise
+    amber = list(rng.normal(0.30, 1.0, 32))              # sits in AMBER at every rung
+    t_amb = ladder_terminal(amber, amber, None, +1, +1)
+    check("persistent AMBER -> primary INCONCLUSIVE_AT_CEILING",
+          t_amb["primary"], CEILING)
+    check("persistent AMBER -> terminal rung is 32b/B128",
+          (t_amb["rung"]["n_blocks"], t_amb["rung"]["B_conf"]), (32, 128))
+    check("ceiling label is NOT a null band",
+          t_amb["primary"] in ("RED", "GREEN"), False)
+    # a compute ceiling can never mint a RED. Constructed at runtime so the
+    # forbidden literal itself never appears in this source file.
+    forbidden = "RED" + "_AT_CEILING"
+    check("no %s anywhere in the source (v3's BLOCKED defect)" % forbidden,
+          forbidden in open(__file__).read(), False)
+    # omega drives the ladder: primary RED at 16b, omega AMBER -> must extend
+    red16 = list(rng.normal(0.0, 1.0, 16)) ; red16 = [v * 0.001 for v in red16]
+    red32 = red16 + [v * 0.001 for v in rng.normal(0.0, 1.0, 16)]
+    t_sh = ladder_terminal(red32, amber, None, +1, +1)
+    check("primary RED at 16b + omega AMBER -> cell EXTENDS (not terminal at 16b)",
+          t_sh["rung"]["n_blocks"] != 16, True)
+    check("all statistics stamped at ONE terminal rung",
+          t_sh["status"], "TERMINAL")
+    t_short = ladder_terminal(list(rng.normal(8.0, 1.0, 32)), amber, None, +1, +1)
+    check("primary GREEN short-circuits the ladder at 16b",
+          (t_short["primary"], t_short["rung"]["n_blocks"]), ("GREEN", 16))
+    check("data too short for the demanded rung -> EXTENSION_REQUIRED, no band",
+          ladder_terminal(amber[:16], amber[:16], None, +1, +1)["status"],
+          "EXTENSION_REQUIRED")
+
+    print("# --- LAW #4: every prose threshold grepped against the frozen config ---")
+    doc = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                       "v44_scout_DECISION_RULE_v3.5.md")
+    src = open(doc).read() if os.path.exists(doc) else None
+    if src is None:
+        print("#   [WARN] ratified doc not found next to the harness; grep skipped")
+    f64, f128 = rule_floor(1.0, 64), rule_floor(1.0, 128)
+    se8, se32, se56 = rule_se(1.0, 8), rule_se(1.0, 32), rule_se(1.0, 56)
+    t15_2, t31, t31_2, t55 = (R["t_two_sided"][15], R["t_one_sided"][31],
+                              R["t_two_sided"][31], R["t_one_sided"][55])
+    derived = {
+        "floor_96": f96, "floor_128": f128, "floor_64": f64,
+        "se_8_96": se8, "se_16_96": se16, "se_32_96": se32, "se_56": se56,
+        "green_16_96_1s": f96 + t15 * se16,
+        "green_16_96_2s": f96 + t15_2 * se16,
+        "kappa_16_96_1s": f96 - t15 * se16,
+        "kappa_16_96_2s": f96 - t15_2 * se16,
+        "kappa_32_96_1s": f96 - t31 * se32,
+        "kappa_32_96_2s": f96 - t31_2 * se32,
+        "kappa_32_128_1s": f128 - t31 * se32,
+        "rerun_edge": t55 * se56,
+        "kappa_56": f96 - t55 * se56,
+    }
+    for k, v in sorted(derived.items()):
+        frozen = R[k]
+        agree = abs(v - frozen) < 1.0e-3          # frozen values are 3-4 s.f.
+        in_doc = (src is None) or (("%g" % abs(frozen)).lstrip("0") in src) \
+                 or (str(abs(frozen)) in src)
+        ok_k = agree and in_doc
+        ok = ok and ok_k
+        print("#   [%s] %-16s formula=%.5f frozen=%-7s in_ratified_doc=%s"
+              % ("PASS" if ok_k else "FAIL", k, v, frozen, in_doc))
+    for name, val in (("n_rerun", R["n_rerun"]), ("B_conf", R["B_conf"]),
+                      ("B_max", R["B_max"]), ("Z", R["Z"]),
+                      ("rerun_power", R["rerun_power"]),
+                      ("blocks_first", R["blocks_first"]),
+                      ("blocks_extended", R["blocks_extended"])):
+        present = (src is None) or (str(val) in src)
+        ok = ok and present
+        print("#   [%s] %-16s frozen=%-7s in_ratified_doc=%s"
+              % ("PASS" if present else "FAIL", name, val, present))
+    # every t* and chi2 factor the rule fires with must be in the prose table
+    for lbl, tab in (("t_one_sided", R["t_one_sided"]), ("t_two_sided", R["t_two_sided"]),
+                     ("chi2_upper", R["chi2_upper"])):
+        miss = [v for v in tab.values() if src is not None and str(v) not in src]
+        ok = ok and not miss
+        print("#   [%s] %-16s %s%s" % ("PASS" if not miss else "FAIL", lbl,
+                                       sorted(tab.values()),
+                                       "" if not miss else " MISSING FROM DOC: %s" % miss))
+    # SUPERSEDED v3.4 constants must not appear as live values in this harness
+    # (rule sec 10 stale-prose row): the n_rerun=40 rerun t*, SE, edge, kappa
+    # and power figures, all superseded by v3.5's honest-model n_rerun=56.
+    # Assembled from fragments so the check does not trip over its own source
+    # (same reason as the forbidden-ceiling-label check above).
+    stale = [s for s in ("1.6" + "85", "0.20" + "16", "0.3" + "40",
+                         "0.2" + "17", "0.9" + "12")
+             if s in open(__file__).read()]
+    check("no superseded v3.4 rerun constants live in the harness", stale, [])
+
+    # law #3 cross-check with scipy where available (NOT a harness dependency:
+    # external replication seats run numpy-only and must still pass).
+    try:
+        from scipy.stats import t as _t, chi2 as _c2, nct as _nct
+        errs = []
+        for df, v in R["t_one_sided"].items():
+            if abs(_t.ppf(0.95, df) - v) > 5e-4: errs.append(("t1s", df))
+        for df, v in R["t_two_sided"].items():
+            if abs(_t.ppf(0.975, df) - v) > 5e-4: errs.append(("t2s", df))
+        for df, v in R["chi2_upper"].items():
+            if abs(math.sqrt(df / _c2.ppf(0.05, df)) - v) > 5e-4: errs.append(("chi2", df))
+        ncp = f96 / se56
+        pw56 = float(_nct.sf(t55, 55, ncp))
+        errs += [] if abs(pw56 - R["rerun_power"]) < 5e-3 else [("power", pw56)]
+        check("scipy cross-check of the frozen t / chi2 / power tables", errs, [])
+        print("#   n_rerun=56 honest noncentral-t power = %.4f (ncp=%.3f, target >= %.2f)"
+              % (pw56, ncp, R["compound_power_target"]))
+    except ImportError:
+        print("#   [SKIP] scipy absent -- frozen tables are the source of truth")
+    print("# RULE SELFTEST " + ("PASS" if ok else "FAIL"))
+    return ok
 
 def pilot():
     """Declared pilot: 4 blocks of the (0.25, 1.0) mismatch arm at full scale,
@@ -992,6 +1666,10 @@ def main():
         return
     if a[0] == "--selftest":
         selftest(); return
+    if a[0] == "--rule-selftest":
+        # v4.4 decision-rule v3.5 only (fast; no physics). Full --selftest
+        # runs this too.
+        sys.exit(0 if _rule_selftest() else 1)
     if a[0] == "--pilot":
         pilot(); return
     if a[0] == "--pilot-pair":
