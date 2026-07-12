@@ -1,0 +1,412 @@
+{
+ "diagnostic": "DIAG 3 \u2014 signal-fidelity M-sweep",
+ "status": "PILOT \u2014 registers nothing, authorizes nothing",
+ "seed_namespace": "diag10::",
+ "quarantine": "QUARANTINED from v44pilot:: and v43::; NEVER pooled (law #6)",
+ "interpreter": "/usr/bin/python3 (Python 3.9.6, numpy 2.0.2)",
+ "harness": {
+  "file": "v44_scout.py (PRISTINE, unedited; imported from a snapshot copy)",
+  "source_sha256": "0b65a9ee92b9fe2c6b5701ed2db9acaf1a4486f9d1db8e1d3047f5f6490b7c38",
+  "source_sha_short": "0b65a9ee92b9fe2c",
+  "config_hash": "a344d6c47c8a22c1",
+  "cfg_edited": false,
+  "M_passed_via": "M_grid_ov override (CFG untouched -> config_hash unchanged)"
+ },
+ "chamber": {
+  "mode": "frozen",
+  "scale": 10.0,
+  "Tc": 1.0,
+  "signal": "registered c4v vortex arms kappa in {4,8} (calibrated true signal)"
+ },
+ "estimand": "R = increment@M_lo / increment@M_hi, increment = mean(y|kappa) - mean(y|k0) at matched (M, block). R<1 => the coarse grid ATTENUATES the realized response to a KNOWN vortex.",
+ "bootstrap": {
+  "n_resamples": 8000,
+  "rng_seed": 999,
+  "unit": "paired-difference vectors d_i (preserves the CRN correlation; resampling raw y independently would OVERSTATE se(R))"
+ },
+ "detection_floor": {
+  "formula": "3.858 * sd * sqrt(2/B)  [harness line 670; alpha_worst=.005, power=.90]",
+  "B_conf": 96,
+  "sd_null_M400": {
+   "quad_loop_rate": 5.469192161518151e-05,
+   "omega_roi": 5.214505908318193e-05
+  },
+  "floor_B96": {
+   "quad_loop_rate": 3.045543362084364e-05,
+   "omega_roi": 2.9037202180184297e-05
+  },
+  "note": "DIAG 1 (receipt 06) showed sd is ~M-independent, so the FLOOR is ~M-independent. All M-dependence of detectability therefore flows through the signal attenuation R: D_min(M) = floor / R(M)."
+ },
+ "results": {
+  "equal_tau_1_1": {
+   "note": "primary measurement, n=900 blocks per (M,kappa) cell",
+   "k4_M400_vs_M2000": {
+    "quad_loop_rate": {
+     "n_blocks": [
+      900,
+      900
+     ],
+     "incr_lo": 0.00012911761584791392,
+     "se_lo": 2.4337659966661052e-06,
+     "incr_hi": 0.00013168288207109592,
+     "se_hi": 2.507243270399512e-06,
+     "R": 0.9805193645306379,
+     "se_R": 0.026402248597762436,
+     "R_ci95": [
+      0.929094787610959,
+      1.0341152590756781
+     ],
+     "sigma_from_1": 0.7378400137862893,
+     "attenuation_pct": 1.9480635469362073,
+     "inflation_1_over_R": 1.0198676703123424,
+     "inflation_ci95": [
+      0.9670101966137011,
+      1.0763164462168215
+     ],
+     "R_ci_excludes_1": false
+    },
+    "omega_roi": {
+     "n_blocks": [
+      900,
+      900
+     ],
+     "incr_lo": 0.00012695973897189382,
+     "se_lo": 2.3988537450512267e-06,
+     "incr_hi": 0.00012437351363555422,
+     "se_hi": 2.2318072918030193e-06,
+     "R": 1.020794020050908,
+     "se_R": 0.02674368907271638,
+     "R_ci95": [
+      0.9692627359700401,
+      1.074044436063188
+     ],
+     "sigma_from_1": 0.7775299807879481,
+     "attenuation_pct": -2.0794020050908024,
+     "inflation_1_over_R": 0.9796295632199422,
+     "inflation_ci95": [
+      0.9310601744425109,
+      1.0317120042783838
+     ],
+     "R_ci_excludes_1": false
+    }
+   },
+   "k8_M400_vs_M2000": {
+    "quad_loop_rate": {
+     "n_blocks": [
+      900,
+      900
+     ],
+     "incr_lo": 0.0002585861792779033,
+     "se_lo": 2.4855602745530978e-06,
+     "incr_hi": 0.00026449501293372284,
+     "se_hi": 2.5834346312758376e-06,
+     "R": 0.9776599430352957,
+     "se_R": 0.013392663057688686,
+     "R_ci95": [
+      0.9520009755316702,
+      1.0038322397380888
+     ],
+     "sigma_from_1": 1.6680817600259834,
+     "attenuation_pct": 2.2340056964704313,
+     "inflation_1_over_R": 1.0228505393146683,
+     "inflation_ci95": [
+      0.9961823902576703,
+      1.0504190916837282
+     ],
+     "R_ci_excludes_1": false
+    },
+    "omega_roi": {
+     "n_blocks": [
+      900,
+      900
+     ],
+     "incr_lo": 0.0002528180071768578,
+     "se_lo": 2.363915869153105e-06,
+     "incr_hi": 0.00025381205381859754,
+     "se_hi": 2.2686976980876907e-06,
+     "R": 0.996083532571506,
+     "se_R": 0.012724947903039503,
+     "R_ci95": [
+      0.9714233002231973,
+      1.0214520002076242
+     ],
+     "sigma_from_1": 0.3077786611258784,
+     "attenuation_pct": 0.39164674284940526,
+     "inflation_1_over_R": 1.0039318664553998,
+     "inflation_ci95": [
+      0.9789985234712314,
+      1.0294173505723374
+     ],
+     "R_ci_excludes_1": false
+    }
+   }
+  },
+  "convergence_check": {
+   "note": "M=2000 is not a priori ground truth. If the response were still rising with M, R=resp400/resp2000 would OVERSTATE fidelity (the dangerous direction). These arms test that. n=300/cell.",
+   "k8_M2000_vs_M5000": {
+    "quad_loop_rate": {
+     "n_blocks": [
+      900,
+      300
+     ],
+     "incr_lo": 0.00026449501293372284,
+     "se_lo": 2.5834346312758376e-06,
+     "incr_hi": 0.0002616570012507939,
+     "se_hi": 4.528952542660458e-06,
+     "R": 1.0108463051604293,
+     "se_R": 0.020102928488182934,
+     "R_ci95": [
+      0.9734257779037553,
+      1.051254313000269
+     ],
+     "sigma_from_1": 0.5395385635881381,
+     "attenuation_pct": -1.0846305160429282,
+     "inflation_1_over_R": 0.9892700748817518,
+     "inflation_ci95": [
+      0.9512446109695477,
+      1.0272996901247793
+     ],
+     "R_ci_excludes_1": false
+    },
+    "omega_roi": {
+     "n_blocks": [
+      900,
+      300
+     ],
+     "incr_lo": 0.00025381205381859754,
+     "se_lo": 2.2686976980876907e-06,
+     "incr_hi": 0.0002596925589883541,
+     "se_hi": 4.003733574643361e-06,
+     "R": 0.977355896554509,
+     "se_R": 0.017291176126644305,
+     "R_ci95": [
+      0.9438697573911247,
+      1.0118533931800862
+     ],
+     "sigma_from_1": 1.3095756633117752,
+     "attenuation_pct": 2.264410344549095,
+     "inflation_1_over_R": 1.023168738762736,
+     "inflation_ci95": [
+      0.9882854638231405,
+      1.0594682075247548
+     ],
+     "R_ci_excludes_1": false
+    }
+   },
+   "k8_M2000_vs_M8000": {
+    "quad_loop_rate": {
+     "n_blocks": [
+      900,
+      300
+     ],
+     "incr_lo": 0.00026449501293372284,
+     "se_lo": 2.5834346312758376e-06,
+     "incr_hi": 0.00026113204248699333,
+     "se_hi": 4.275135003867719e-06,
+     "R": 1.0128784289155055,
+     "se_R": 0.01927377489633674,
+     "R_ci95": [
+      0.9759044179478938,
+      1.0517559987755798
+     ],
+     "sigma_from_1": 0.6681840472233197,
+     "attenuation_pct": -1.2878428915505502,
+     "inflation_1_over_R": 0.9872853162355383,
+     "inflation_ci95": [
+      0.9507908689507524,
+      1.0246905143669436
+     ],
+     "R_ci_excludes_1": false
+    },
+    "omega_roi": {
+     "n_blocks": [
+      900,
+      300
+     ],
+     "incr_lo": 0.00025381205381859754,
+     "se_lo": 2.2686976980876907e-06,
+     "incr_hi": 0.0002576030209476732,
+     "se_hi": 3.974049104306265e-06,
+     "R": 0.9852836852800507,
+     "se_R": 0.017512360340656796,
+     "R_ci95": [
+      0.9515459589593958,
+      1.0207155712735405
+     ],
+     "sigma_from_1": 0.8403387341102041,
+     "attenuation_pct": 1.4716314719949275,
+     "inflation_1_over_R": 1.0149361193530433,
+     "inflation_ci95": [
+      0.9797048542644512,
+      1.0509213880678903
+     ],
+     "R_ci_excludes_1": false
+    }
+   },
+   "k8_M400_vs_M8000": {
+    "quad_loop_rate": {
+     "n_blocks": [
+      900,
+      300
+     ],
+     "incr_lo": 0.0002585861792779033,
+     "se_lo": 2.4855602745530978e-06,
+     "incr_hi": 0.00026113204248699333,
+     "se_hi": 4.275135003867719e-06,
+     "R": 0.9902506671152129,
+     "se_R": 0.018848725304847803,
+     "R_ci95": [
+      0.9547846149983085,
+      1.0282584123524705
+     ],
+     "sigma_from_1": 0.5172409660126774,
+     "attenuation_pct": 0.9749332884787076,
+     "inflation_1_over_R": 1.009845318168973,
+     "inflation_ci95": [
+      0.9725181802424351,
+      1.0473566334138842
+     ],
+     "R_ci_excludes_1": false
+    },
+    "omega_roi": {
+     "n_blocks": [
+      900,
+      300
+     ],
+     "incr_lo": 0.0002528180071768578,
+     "se_lo": 2.363915869153105e-06,
+     "incr_hi": 0.0002576030209476732,
+     "se_hi": 3.974049104306265e-06,
+     "R": 0.9814248538188248,
+     "se_R": 0.017459255658556102,
+     "R_ci95": [
+      0.9482333130053192,
+      1.0164215026160992
+     ],
+     "sigma_from_1": 1.0639139803232227,
+     "attenuation_pct": 1.8575146181175173,
+     "inflation_1_over_R": 1.0189267126351014,
+     "inflation_ci95": [
+      0.9838438063600259,
+      1.0545927740406125
+     ],
+     "R_ci_excludes_1": false
+    }
+   }
+  },
+  "aniso_transfer": {
+   "note": "Does the attenuation measured at equal-tau transfer to the MISMATCH geometry the scout actually runs? Registered aniso_pairs. k8, n=400/cell.",
+   "arm1_tx0.25_ty1.0__k8_M400_vs_M2000": {
+    "quad_loop_rate": {
+     "n_blocks": [
+      400,
+      400
+     ],
+     "incr_lo": 0.0002675923395371747,
+     "se_lo": 4.212046979983188e-06,
+     "incr_hi": 0.0002686479772772651,
+     "se_hi": 4.177405525835941e-06,
+     "R": 0.9960705539241754,
+     "se_R": 0.022014127217209477,
+     "R_ci95": [
+      0.9543188346124313,
+      1.040445124704052
+     ],
+     "sigma_from_1": 0.17849656436766384,
+     "attenuation_pct": 0.3929446075824572,
+     "inflation_1_over_R": 1.003944947534433,
+     "inflation_ci95": [
+      0.9611270947945896,
+      1.0478678233424166
+     ],
+     "R_ci_excludes_1": false
+    },
+    "omega_roi": {
+     "n_blocks": [
+      400,
+      400
+     ],
+     "incr_lo": 0.0002586626042625331,
+     "se_lo": 3.5648122174392483e-06,
+     "incr_hi": 0.0002707644250404586,
+     "se_hi": 3.739945665353136e-06,
+     "R": 0.9553049822696713,
+     "se_R": 0.018552520220624,
+     "R_ci95": [
+      0.9196848770456709,
+      0.9917778285162819
+     ],
+     "sigma_from_1": 2.409107614427675,
+     "attenuation_pct": 4.469501773032869,
+     "inflation_1_over_R": 1.0467861243894485,
+     "inflation_ci95": [
+      1.0082903360483653,
+      1.0873289590368471
+     ],
+     "R_ci_excludes_1": true
+    }
+   },
+   "arm2_tx1.0_ty0.25__k8_M400_vs_M2000": {
+    "quad_loop_rate": {
+     "n_blocks": [
+      400,
+      400
+     ],
+     "incr_lo": 0.00028342844606619533,
+     "se_lo": 4.323317995385409e-06,
+     "incr_hi": 0.00029084847437535683,
+     "se_hi": 4.248136748407842e-06,
+     "R": 0.9744883368389771,
+     "se_R": 0.020537471166614234,
+     "R_ci95": [
+      0.9353170120377654,
+      1.0150766297917602
+     ],
+     "sigma_from_1": 1.2422008023312412,
+     "attenuation_pct": 2.5511663161022935,
+     "inflation_1_over_R": 1.026179546944376,
+     "inflation_ci95": [
+      0.9851472988843679,
+      1.0691562188324901
+     ],
+     "R_ci_excludes_1": false
+    },
+    "omega_roi": {
+     "n_blocks": [
+      400,
+      400
+     ],
+     "incr_lo": 0.00026662056348451,
+     "se_lo": 3.6901464049378084e-06,
+     "incr_hi": 0.0002700441601841765,
+     "se_hi": 4.157632456070108e-06,
+     "R": 0.9873220857754097,
+     "se_R": 0.020625758414096914,
+     "R_ci95": [
+      0.9474330293129769,
+      1.028669866636627
+     ],
+     "sigma_from_1": 0.6146641481035401,
+     "attenuation_pct": 1.2677914224590303,
+     "inflation_1_over_R": 1.0128407076143076,
+     "inflation_ci95": [
+      0.9721291858870457,
+      1.0554835741003685
+     ],
+     "R_ci_excludes_1": false
+    }
+   }
+  }
+ },
+ "verdict": {
+  "n_cells_measured": 14,
+  "R_range": [
+   0.9553049822696713,
+   1.020794020050908
+  ],
+  "worst_cell": "arm1_tx0.25_ty1.0__k8_M400_vs_M2000::omega_roi",
+  "worst_case_inflation_of_min_detectable_true_current": 1.0873289590368471,
+  "feared_value_from_receipt06": 1.4925373134328357,
+  "scope": "Bounds the EXTERNAL-FORCE channel (injected vortex). The scout's engine signal is GRID-GENERATED (a difference of two noisy S_c grids); that channel is reduced by the aniso-transfer arms but NOT directly bounded. See DIAG3_REPORT.md sec.7."
+ }
+}

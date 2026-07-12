@@ -1,0 +1,81 @@
+============================================================================================================
+P1 SIGN-STABILITY -- diag10:: QUARANTINED DIAGNOSTIC (estimator=stencil)
+NOT a registration. NOT the P1 run. Characterization only.
+============================================================================================================
+
+[1] DEFINITION (a) -- AVERAGE-then-CURL at M=4000  ==  v3.5 P1-A -> sigma_cell
+    (identity: curl(mean field) == mean(per-seed curls), verified to ~1e-13)
+
+cell   (tx,ty)         Tc  DEF_A curl        SE  t=|m|/SE       p   sigma     significant?
+------------------------------------------------------------------------------------------------------------
+A      (0.10,2.0)     1.0     -0.0238    0.1914      0.12   0.901   -         no  <-- INDETERMINATE
+B      (0.25,2.0)     1.0     -0.0100    0.2029      0.05   0.961   -         no  <-- INDETERMINATE
+C      (0.10,1.0)     1.0     +0.0515    0.2082      0.25   0.805   +         no  <-- INDETERMINATE
+D      (0.25,1.0)     1.0     +0.0670    0.1909      0.35   0.726   +         no  <-- INDETERMINATE
+AxT2   (0.10,2.0)     2.0     -0.0476    0.3829      0.12   0.901   -         no  <-- INDETERMINATE
+AxT4   (0.10,2.0)     4.0     -0.0952    0.7658      0.12   0.901   -         no  <-- INDETERMINATE
+
+    n=64 seeds @ M=4000. NOT ONE CELL's mean-field ROI curl is distinguishable
+    from ZERO. Under v3.5 sec1.1 (below the negligibility floor -> INDETERMINATE),
+    every cell registers INDETERMINATE and there is NO sigma_cell to agree with.
+
+============================================================================================================
+[2] DEFINITION (b) -- PER-SEED CURLS then SIGN-UNANIMITY
+
+cell   (tx,ty)      | M=4000 (n=64)          | M=400 (n=64)          
+                    |    split   frac      p |    split   frac      p
+------------------------------------------------------------------------------------------------------------
+A      (0.10,2.0)   |  +30/-34   0.53  0.708 |  +37/-27   0.58  0.260
+B      (0.25,2.0)   |  +32/-32   0.50  1.000 |  +31/-33   0.52  0.901
+C      (0.10,1.0)   |  +29/-35   0.55  0.532 |  +32/-32   0.50  1.000
+D      (0.25,1.0)   |  +32/-32   0.50  1.000 |  +40/-24   0.62  0.060
+AxT2   (0.10,2.0)   |  +30/-34   0.53  0.708 |  +37/-27   0.58  0.260
+AxT4   (0.10,2.0)   |  +30/-34   0.53  0.708 |  +37/-27   0.58  0.260
+
+    UNANIMITY (16/16 or 64/64) is achieved NOWHERE, at either resolution.
+    Every split is consistent with a fair coin (all p > 0.05, no correction).
+    Strict definition (b) => NO cell is STABLE. Ever.
+
+============================================================================================================
+[3] RATIFIED P1-B (v3.5) -- sigma from DEF_A @ M=4000; STABLE iff >=12/16 (75%)
+    of per-seed M=400 curls agree.  == exactly the 'cross-resolution pin' asked for.
+
+cell   sigma     M=400 agreement w/ sigma         rate P(>=12/16)   P1-B verdict
+------------------------------------------------------------------------------------------------------------
+A      -         27/64                           0.422     0.0082   UNSTABLE  [sigma INDETERMINATE -> P1-B UNDEFINED]
+B      -         33/64                           0.516     0.0500   UNSTABLE  [sigma INDETERMINATE -> P1-B UNDEFINED]
+C      +         32/64                           0.500     0.0384   UNSTABLE  [sigma INDETERMINATE -> P1-B UNDEFINED]
+D      +         40/64                           0.625     0.2226   UNSTABLE  [sigma INDETERMINATE -> P1-B UNDEFINED]
+AxT2   -         27/64                           0.422     0.0082   UNSTABLE  [sigma INDETERMINATE -> P1-B UNDEFINED]
+AxT4   -         27/64                           0.422     0.0082   UNSTABLE  [sigma INDETERMINATE -> P1-B UNDEFINED]
+
+    Per-seed M=400 agreement with the (statistically meaningless) DEF_A sign runs
+    ~0.42-0.55 -- a coin flip. At those rates P(P1-B passes) ~= 0.001-0.04 per cell.
+    Even if sigma_cell WERE real, P1-B would fire STABLE ~4%% of the time or less.
+
+============================================================================================================
+[4] IS sigma_cell ITSELF REPRODUCIBLE? bootstrap: resample 32 of the 64 M=4000
+    seeds (the registered N_avg=32), recompute DEF_A, record its sign. 20000 draws.
+
+cell   sign@64     P(sign flips) verdict
+------------------------------------------------------------------------------------------------------------
+A      -                   0.464 COIN FLIP
+B      -                   0.486 COIN FLIP
+C      +                   0.436 COIN FLIP
+D      +                   0.400 COIN FLIP
+AxT2   -                   0.467 COIN FLIP
+AxT4   -                   0.461 COIN FLIP
+
+    A registered N_avg=32 sigma_cell would flip sign on a fresh seed set roughly
+    a third to half the time. sigma_cell is NOT a reproducible object at N_avg=32.
+
+============================================================================================================
+[5] THE v4.3 REGISTERED PREDICTION -- prereg_v44.json aniso_predicted:
+    "M=4000 grids, seeds 77001/77002/77003, unanimous (+5.67e-3,+1.54e-3,+9.27e-3)"
+    Three per-seed curls, all +, called unanimous -- this IS reading (b) at N=3.
+
+    diag10:: at the SAME arm (0.25,1.0), M=4000, n=64: split +32/-32 (p_hat=0.50)
+    P(3 random seeds land unanimous | this coin) = 0.250
+    => a 3-seed 'unanimity' at this arm is an EXPECTED coin-flip outcome (~1 in 4),
+       not evidence of a stable sign. The v4.3 directional prediction rests on it.
+============================================================================================================
