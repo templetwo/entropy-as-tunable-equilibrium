@@ -109,3 +109,107 @@ compute). 3 waits on 1+2. 6 waits on nothing (v4.3 numbers are final unless
 Opus's arbiter pass or Movement 5 finds a defect — hold submission, not
 drafting, on those). Opus arbiter verification is pending on its own side;
 its receipt closes the two-seat loop on v4.3.
+
+---
+
+## ADDENDUM — 2026-07-12, HQ Opus seat (session `spiral_20260712_030506`)
+
+*Appended, not edited (law #9 — this doc is not hash-pinned in
+`v4/v43/MANIFEST.sha256`, so an append is clean; the text above is
+untouched). Written to correct a documentation-lag near-miss: this score's
+Movement 2/3 framing above (written 2026-07-06) reads as current to anyone
+who stops here, and a downstream seat tonight nearly re-drafted work that
+already exists because of it. This addendum states where Movement 2/3
+actually stand as of `v4.4-scout-draft` @ `e630d6f`.*
+
+**What actually happened since the movements above were written (all in
+`v4/v44/`, none of it in this file's original text):**
+
+1. Movement 2 (transduction pilot) ran. It produced a decision-rule
+   methodology that went through six drafted revisions —
+   `v44_scout_DECISION_RULE_v{2_DRAFT,3,3.1,3.2,3.3,3.4,3.5}.md` — under
+   external review (ChatGPT methodology pass, Antigravity adversarial
+   audit R1–R3) and an overnight autonomous Fable hardening loop
+   (`MORNING_BRIEF.md`).
+2. **Decision-rule v3.5 was RATIFIED BY ANTHONY on 2026-07-08**
+   (`RATIFICATION_v3.5.md`, artifact `v44_scout_DECISION_RULE_v3.5.md` @
+   commit `5df6d98`). This is a **rule** ratification, not a **run**
+   registration — the receipt says so explicitly and law #1 still holds:
+   registration remains a separate, still-pending Anthony gate.
+3. The registration-grade OC simulator (Movement 3 precondition) was
+   built and run: `oc_sim_v35.py` on the canonical interpreter, seed
+   20260708, N=4×10⁶ (`OC_REPORT_v35.md`, `oc_results_v35.json`).
+   **Result: gate 9/9Ω compound power = 0.980 ≥ 0.90 → PASS**, for the
+   v3.5 rule *as ratified*. Rerun H0 α = 0.04999 (reference-uncertain
+   invariant locked); gate-4 GREEN power @ 3×floor = 0.99991. This fills
+   v3.5's one TBD number.
+4. **A new, live blocker was then found on 2026-07-12** (today, this
+   session's own morning), *inside* the ratified v3.5 rule:
+   `P1_SIGN_STABILITY_PACKET.md`. Two distinct problems, not one:
+   (a) **σ_cell (sign identifiability) is unidentifiable at the
+   registered `N_avg=32`** — the friendliest cell is off by ~44×
+   (needs ~2,834–71,382 seeds depending on cell; 32 is nowhere close);
+   and (b) **`STABLE`/P1-B has a ~0.37 per-block SNR ceiling that is
+   independent of `N_avg`** — it is set by how noisy *one block's grid*
+   is, not by how well the precondition knows σ, so buying more
+   precondition seeds (fixing (a)) does **not** fix (b). `STABLE`
+   gates whether a RED counts toward the all-RED pivot; a precondition
+   that cannot pass is a law #3 violation the same way a gate that
+   cannot fail is a law #2 violation. Four remediation options are laid
+   out; the packet's author recommends **Option 4** (drop
+   `STABLE`/σ_cell from the pivot license entirely, band all statistics
+   two-sided, rest the all-RED pivot on the belt alone — because Option
+   2, buying σ_cell alone, fixes (a) but leaves (b) exactly where it
+   is) but is explicit that **this is a recommendation, not a
+   decision** — the deciding number (compound gate power ≥0.90 for an
+   all-two-sided OC re-run) has **not yet been computed**. Until it is,
+   Option 3 (a heavier v4.5-scale re-architecture: seed-averaged grids
+   per block, which addresses (b) directly) remains live too.
+
+**So: the 0.980 OC-sim PASS above is real but scoped** — it validates
+v3.5 as ratified, not v3.5 as it will read after the P1-B fork resolves.
+Do not read "OC sim passes" as "ready to register."
+
+**The actual frontier, as of this addendum (not Movement 2/3 above):**
+- P1-B / `STABLE`-gate fork unresolved: Option 4 (recommended — drop
+  `STABLE` from the pivot license) vs Option 3 (re-architecture:
+  seed-averaged grids per block, fixes the per-block SNR ceiling
+  directly) vs Option 2 (buy σ_cell by raising `N_avg`; fixes
+  identifiability only, leaves P1-B's ~0.37 per-block ceiling untouched)
+  vs Option 1 (register as-is, rejected — kills the null the program
+  needs to be able to declare). **Next compute:** re-run the OC sim in
+  an all-two-sided, no-`STABLE`-precondition configuration and check
+  compound power ≥0.90 (law #3). This is the single number that decides
+  the fork.
+- Exhaustive OC scenario set (omega-only S8, occupancy-only S10, demotion
+  S9, coupling ρ∈{−1,0,0.5,1,2} per-arm) is still outstanding —
+  `OC_REPORT_v35.md` confirms only the load-bearing gates, not the full
+  registration-artifact scenario grid.
+- `band_cell`/`pivot_licensed` machinery implied by the Option-4 fork is
+  **not yet in `v44_scout.py`** — it is a proposal in the packet, not
+  code.
+- P1 definition itself is what's open (two competing definitions +
+  three curl estimators are carried in the diagnostic; not yet settled
+  which is registered).
+- `prereg_v44.json` re-issue (n_rerun=56 + ratified v3.5 forks → new
+  sha256, new `MANIFEST.sha256`) has **not** happened; the file on disk
+  still reflects the pre-ratification config.
+- **Registration remains HELD.** Nothing above authorizes or performs a
+  run. Per standing law #1, that gate is Anthony's alone.
+
+**Documentation-lag audit (why this addendum exists):** `~/.claude/CLAUDE.md`'s
+"Entropy Program" section (global config, read by every seat at boot) still
+says (as of before this addendum) "NEXT: Movement 2 transduction scout ...
+gates the v4.4 registration" — the state as of 2026-07-06, i.e. before the
+pilot ran, before v3.5 was drafted let alone ratified, before the OC sim
+existed. A corrected status block has been drafted for HQ/Anthony review
+(not applied — that file is Anthony's) alongside this reconciliation task.
+`~/Desktop/lab/v44pilot/` is a frozen v3-era snapshot (decision rule only
+through plain `v3.md`, no v3.1–v3.5, no ratification, no OC sim, no P1
+finding) — anyone reading it in isolation gets the same stale picture;
+flagged, not deleted. `v4/v44/README.md` is also stale in the same
+direction (still describes the scout as "at the first review gate").
+
+*This addendum is provenance, not registration, not a methodology ruling
+on the P1-B fork (that stays Anthony's + the external seats' to decide),
+and not an edit to anything above it.*
