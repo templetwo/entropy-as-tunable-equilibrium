@@ -200,21 +200,28 @@ def main():
                            "EXECUTABLE estimator via imported band_cell/ladder_terminal/"
                            "scout_outcome only."),
     }
-    agg = {}
+    # Collect ALL chunk results first, then write in canonical (scenario,
+    # chunk) order with sorted keys: the primary record is byte-reproducible
+    # run-to-run (anchor's hardening note, mesh-20260713). Wall time goes to
+    # stdout only — never into the record — for the same reason.
+    scen_order = {key: i for i, (_, key, *_rest) in enumerate(SCENARIOS)}
+    agg, rows = {}, []
+    with mp.Pool(min(12, mp.cpu_count())) as pool:
+        for out in pool.imap_unordered(_run_job, jobs, chunksize=1):
+            rows.append(out)
+            a = agg.setdefault(out["scenario"], {})
+            for k, v in out.items():
+                if isinstance(v, dict):
+                    d = a.setdefault(k, {})
+                    for kk, vv in v.items():
+                        d[kk] = d.get(kk, 0) + vv
+                elif isinstance(v, int) and k not in ("chunk",):
+                    a[k] = a.get(k, 0) + v
+    rows.sort(key=lambda r: (scen_order[r["scenario"]], r["chunk"]))
     with open(ndjson_path, "w") as fh:
-        fh.write(json.dumps(header) + "\n")
-        with mp.Pool(min(12, mp.cpu_count())) as pool:
-            for out in pool.imap_unordered(_run_job, jobs, chunksize=1):
-                fh.write(json.dumps({"type": "chunk", **out}) + "\n")
-                fh.flush()
-                a = agg.setdefault(out["scenario"], {})
-                for k, v in out.items():
-                    if isinstance(v, dict):
-                        d = a.setdefault(k, {})
-                        for kk, vv in v.items():
-                            d[kk] = d.get(kk, 0) + vv
-                    elif isinstance(v, int) and k not in ("chunk",):
-                        a[k] = a.get(k, 0) + v
+        fh.write(json.dumps(header, sort_keys=True) + "\n")
+        for out in rows:
+            fh.write(json.dumps({"type": "chunk", **out}, sort_keys=True) + "\n")
 
         # ---- summaries ----
         def frac(d, key_, n): return round(d.get(key_, 0) / n, 6)
@@ -244,7 +251,6 @@ def main():
                 for k, v in sorted(agg["pivot_null_1s_stable_true"]["outcomes"].items())},
             "estdiv": {},
             "ratified_for_diff": RATIFIED,
-            "wall_seconds": round(time.time() - t0, 1),
         }
         for kind, key, sidx, total, params in SCENARIOS:
             if kind != "estdiv":
@@ -253,7 +259,7 @@ def main():
             summary["estdiv"][key] = {
                 "P_RED_null_exec_rawmean": round(a["red_exec"] / a["n"], 5),
                 "P_RED_null_refsub": round(a["red_refsub"] / a["n"], 5)}
-        fh.write(json.dumps(summary) + "\n")
+        fh.write(json.dumps(summary, sort_keys=True) + "\n")
 
     # ---- human-readable report ----
     print("=" * 72)
@@ -286,7 +292,7 @@ def main():
             k.replace("estdiv_", ""), v["P_RED_null_exec_rawmean"], v["P_RED_null_refsub"]))
     print("   (2026-07-12 blocker measured: exec 0.4768 vs refsub 0.4002)")
     print("primary record: %s" % ndjson_path)
-    print("wall: %.1fs" % summary["wall_seconds"])
+    print("wall: %.1fs (stdout only — never in the record)" % (time.time() - t0))
 
 if __name__ == "__main__":
     main()

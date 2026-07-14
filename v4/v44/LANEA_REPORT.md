@@ -123,10 +123,17 @@ P(pivot | true null) ≲ 0.04⁶ × 0.074 ≈ 10⁻¹⁰ as ratified.
 
 | file | sha256 |
 |---|---|
-| `oc_sim_v36_exec.py` | `14a66ab6c7e918dadf015e9bea3bb54df7a52504d4bc953a2cb3422d9a12e3bb` |
-| `oc_results_v36_exec.ndjson` (primary) | `839f93e34a4d55d55f63293e4181aa68070f82d6fa9f15990250ae7430a8e9d1` |
+| `oc_sim_v36_exec.py` (hardened: canonical chunk order + sorted keys, wall time stdout-only) | `3ede691124835db906df761ede3f2c0e98ca75592cb5220bdd28188b155e0bce` |
+| `oc_results_v36_exec.ndjson` (primary, **byte-reproducible**: two independent full runs both hash `f80838ef…`) | `f80838efe04933577e333e4a37e40b7ce1a7a668a14b7677fe9142fe87021a5f` |
 | `p1_signstability_diag10_pinned.py` | `bb9865e4c5b4718b9023a4cbcf4c996c14fefccf96fb5baa005e98dbd2491fc8` |
 | `p1_signstability_full_pinned.ndjson` (primary) | `79f0ed2670daecbbabf3b892e95bc07d93578bc2d43fa9bef900b55080b9686a` |
 | `diag10_signstability_full_pinned.json` (secondary, analyzer-compat) | `7ffe3e38d05cf931871ac31296cbac40899aea6dd8eea6e856b7a8bbfee4a024` |
 
 Nothing merges without anchor verification + Anthony (collision law).
+
+*Rev 2 (anchor's hardening note applied): chunk records now written in
+canonical (scenario, chunk) order with sorted keys; wall time removed from the
+record. Verified by running the full MC twice — identical NDJSON sha256 both
+times, gate 9 compound unchanged at 0.98114. The earlier unordered record
+(`839f93e3…`) is superseded by `f80838ef…`; same seeds, same counts, same
+numbers, canonical bytes.*
