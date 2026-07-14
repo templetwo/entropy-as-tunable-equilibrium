@@ -273,3 +273,61 @@ composition P(pivot | true null) ≲ 1×10⁻¹⁰ as currently registered is *c
 but only if it is *disclosed* — undisclosed, it is the inert-clause disease at the
 scale of an outcome. (Law-#4 grep row added in §10: the null headline may not be quoted
 without this conditionality.)
+
+---
+
+## CONSTANTS APPENDIX — the frozen tables, restated verbatim in the operative document **[v3.6, added per anchor finding 7]**
+
+*A ratified rule document must be SELF-CONTAINED in its constants (law #4, generalized
+by finding 7: the integration selftest's prose-vs-config grep correctly refuses
+retained-by-reference tables — and the v3.5 reference chain still carries the
+superseded 1.153, so following references would verify the harness against a superseded
+constant). Every threshold the rule enforces is restated here with the ratified values.
+Honest date pair: base tables ratified with v3.5 on 2026-07-08; the v3.6 dispositions
+(including `green_16_96_2s` → 1.152) ratified 2026-07-13. `rule_version = v3.6`.*
+
+### A.1 Detection floor (§0.1) — `floor(B, sd) = Z·sd·√(2/B)`, `Z = 3.858` (z₀.₉₉₅ + z₀.₉₀), `alpha = 0.05`
+
+| B | floor(B) |
+|---|---|
+| 64  | **0.682**·sd |
+| 96  | **0.557**·sd (B_conf working default; `blocks_first = 16`, `blocks_extended = 32`) |
+| 128 | **0.482**·sd (`B_max = 128`, the declared compute ceiling) |
+
+Honest SE (§2.1): `SE(sd, n) = sd·√(1/n + 1/ref_blocks)`, `ref_blocks = 64`.
+
+### A.2 Frozen Student-t convention (§2.2), α = 0.05
+
+| df (n−1) | one-sided t (0.95) | two-sided t (0.975) |
+|---|---|---|
+| 7  (8 blocks)  | **1.895** | **2.365** |
+| 15 (16 blocks) | **1.753** | **2.131** |
+| 31 (32 blocks) | **1.696** | **2.040** |
+| 55 (56 blocks — §8/§8-Ω powered rerun) | **1.673** | **2.004** |
+
+### A.3 Exact thresholds (§2.3) — per statistic, units of sd_cell; RED per the ratified §3.6 single magnitude conjunct (`|μ̂| < κ`)
+
+| Config (blocks / B_conf) | floor_c | SE | GREEN x > (1-sided) | GREEN \|μ̂\| > (2-sided) | RED κ (1-sided) | RED κ (2-sided) |
+|---|---|---|---|---|---|---|
+| **16 / 96 (OPERATIVE first pass)** | 0.557 | **0.2795** (`se_16_96`) | **1.047** (`green_16_96_1s`) | **1.152** (`green_16_96_2s` — **ratified row 5; supersedes v3.5's 1.153**) | **0.067** (`kappa_16_96_1s`) | **−0.039** (`kappa_16_96_2s` < 0 → two-sided RED UNREACHABLE at 16b) |
+| 8 / 96 (legacy reference) | 0.557 | **0.375** (`se_8_96`) | 1.267 | 1.444 | κ < 0 → unreachable | κ < 0 → unreachable |
+| 32 / 96 (AMBER extension) | 0.557 | **0.2165** (`se_32_96`) | 0.924 | 0.998 | **0.190** (`kappa_32_96_1s`) | **0.115** (`kappa_32_96_2s`) |
+| 32 / 128 (B_conf escalation, ceiling) | 0.482 | 0.2165 | 0.849 | 0.924 | **0.115** (`kappa_32_128_1s`) | 0.041 |
+| **56 (§8/§8-Ω powered rerun — significance vs 0 only, never a banding config)** | 0.557 (B96 projection) | **0.1830** (`se_56`) | *(fires at \|x\| > t₅₅·SE₅₆ = **0.306** — `rerun_edge`)* | *(n/a)* | *(reband-look κ₅₆ = 0.557 − 0.306 = **0.251** — `kappa_56`)* | *(n/a)* |
+
+Powered rerun: `n_rerun = 56`, honest noncentral-t power at ∓1×floor(96) = **0.913**
+(`rerun_power`); law #3 additionally requires **compound six-cell MC power ≥ 0.90**
+(`compound_power_target`) — certified for v3.5-as-executable at **0.98114** by the Lane
+A instrument, to be re-confirmed under the v3.6 `source_sha`.
+
+### A.4 χ²-upper factors (§3.3 historical annotation + the verdict-identity regression)
+
+`sd_up = sd·√((n−1)/χ²_{0.05,n−1})`: df 7 → **1.797**, df 15 → **1.437**, df 31 →
+**1.268** (`chi2_upper`). These no longer enter any normative verdict (ratified row 1
+removed the coupled-upper conjuncts); they remain frozen because the §9.4
+**verdict-identity regression** reproduces the v3.5 four-conjunct arithmetic against
+the simplified rule, and the historical §3.3 annotation cites them.
+
+*Cross-check receipt: every constant in this appendix re-derived from `Z`, the t table,
+and the SE formula in `laneB/law4_grepcheck.txt` (19/20 reproduce within 5×10⁻⁴; the
+20th is exactly the ratified 1.153 → 1.152 correction this appendix carries).*
