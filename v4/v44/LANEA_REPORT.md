@@ -137,3 +137,51 @@ record. Verified by running the full MC twice — identical NDJSON sha256 both
 times, gate 9 compound unchanged at 0.98114. The earlier unordered record
 (`839f93e3…`) is superseded by `f80838ef…`; same seeds, same counts, same
 numbers, canonical bytes.*
+
+## 7. Enactment (v3.6, ratified by Anthony 2026-07-13) — Rev 3
+
+Registration-time code landed in `v44_scout.py` per the anchor's dispatch and
+Lane B's §7 delta, with the anchor's three interim-verification nits folded
+before commit:
+
+- **§3.3 simplification (fork 14):** `band_cell` RED = the single magnitude
+  conjunct; coupled-upper + aligned conjuncts removed, homogeneity theorem in
+  the docstring, historical arithmetic pinned by a **verdict-identity
+  regression in `_rule_selftest()`** (108,648 seeded + boundary-hugging
+  probes vs the reconstructed v3.5 four-conjunct arithmetic; 0 differences).
+- **`R_occ` plumbing (fork 15):** `pivot_licensed` gains the (0″)
+  estimand-registration guard before any band is read; `scout_report` reads
+  the registered name **only from `--prereg`** (never the CLI), withholds on
+  absent/mismatch, stamps both names. End-to-end exploit closure verified:
+  Lane B's run-B shape now WITHHELD; registered `lr_asymmetry` emits;
+  mismatched prereg WITHHELD with the registration-integrity reason.
+- **Finding 6:** `CFG.scout.blocks` 8 → 16 (= `RULE.blocks_first`) +
+  cross-assert in the selftest so config-vs-rule drift can never pass
+  silently. `green_16_96_2s` → 1.152 (derived 1.15249, ratified row-5
+  convention). `rule_version` → v3.6; `ratified` split into an honest pair
+  (v3.6: 2026-07-13; v3.5: 2026-07-08). Law-#4 doc grep is version-driven
+  (WARN-skips until the finalized v3.6 doc lands at integration).
+- `--rule-selftest`: **PASS, exit 0**, including all new checks.
+
+**Re-certification under the final pins** (`v44_scout.py` sha256
+`bce6b7384351982934cf7e48211dfbff26eee7cd7137982387b573439073ceb1`,
+config_hash `ba7c854ebc825476`): the full MC, run twice —
+
+- **Byte-reproducible:** both runs hash the NDJSON to
+  `b44948bbd00161aed8256957740300d49ea887d2dda1906886b14d936b00d826`.
+- **Verdict identity at scale:** gate 9 compound **0.98114** (PASS ≥ 0.90),
+  gate 1 false-GREEN 0.000416, gate 4 GREEN power 0.99997, terminal
+  P(RED|null) 0.647867, and all five estimator-divergence rows —
+  **digit-for-digit identical to the v3.5-pin run** across 12.8M seeded
+  replications. The §3.3 removal is behavior-preserving at scale, not just on
+  the 108k-probe grid.
+- **Pivot legs through the imported `R_occ`** (uniform 24-bin multinomial
+  histograms reduced by the registered `lr_asymmetry`): 0 of 1,000,000
+  licensed under six-cell true null with STABLE at chance; 0.016494 with
+  STABLE forced true (§13's predeclared 0.017). The §4/§5 composed finding
+  stands unchanged under the registered veto: outcome 2 remains unreachable
+  until P1's physics amendment (named open fork).
+
+An earlier double run was killed mid-flight when the nit fixes changed the
+harness bytes — it would have certified a superseded source. Nothing here
+registers anything; the anchor integrates; the gate is Anthony's.

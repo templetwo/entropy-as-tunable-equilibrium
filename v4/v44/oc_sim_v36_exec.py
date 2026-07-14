@@ -61,9 +61,15 @@ import numpy as np
 import v44_scout as VS
 
 # ---- the pin: certify-what-runs is structural ----------------------------
-PIN_SHA256 = "1fe9fa1c9d203c508fbc4016a8e39e1a7dc055824a91e2935b1db9bfbfc0e35d"
-PIN_CONFIG = "a344d6c47c8a22c1"
-PIN_GIT    = "7a02eb5"
+# [v3.6 enactment] pins moved off 1fe9fa1c…/a344d6c4… when the ratified
+# changes landed (sec-3.3 simplification, R_occ plumbing, finding-6 blocks
+# fix + green_16_96_2s 1.152). Because the sec-3.3 change is verdict-identical
+# and the ladder legs are seed-deterministic, gate9/null/gate4/estdiv counts
+# must reproduce the v3.5-pin run EXACTLY — that reproduction is itself a
+# 12.8M-rep verdict-identity receipt.
+PIN_SHA256 = "bce6b7384351982934cf7e48211dfbff26eee7cd7137982387b573439073ceb1"
+PIN_CONFIG = "ba7c854ebc825476"
+PIN_GIT    = "7a02eb5+laneA"
 
 def _assert_pins():
     sha = hashlib.sha256(
@@ -72,7 +78,7 @@ def _assert_pins():
     assert VS.SOURCE_SHA == sha[:16], "module SOURCE_SHA mismatch"
     assert VS.config_hash() == PIN_CONFIG, "config_hash %s != pinned %s" % (
         VS.config_hash(), PIN_CONFIG)
-    assert VS.RULE["rule_version"] == "v3.5"
+    assert VS.RULE["rule_version"] == "v3.6"
     assert VS.RULE["compound_power_target"] == 0.90            # law #3 floor
     assert abs(VS.rule_floor(1.0, 96) - 0.55685) < 5e-5        # law #4 spot checks
     assert abs(VS.rule_floor(1.0, 128) - 0.48225) < 5e-5
@@ -84,6 +90,7 @@ SEED   = 20260713
 FLOOR  = VS.rule_floor(1.0, 96)
 CELLS  = ("A", "B", "C", "D", "AxT2", "AxT4")
 CHUNK  = 100_000
+R_OCC  = VS.OCC_REDUCTIONS["lr_asymmetry"]   # [v3.6] fork 15, imported
 
 def _rng(scen_idx, chunk_idx):
     return np.random.default_rng(
@@ -117,12 +124,18 @@ def _pivot_chunk(scen_idx, chunk_idx, n_reps, sigma, force_stable=False):
         for c in CELLS:
             q = rng.normal(0.0, 1.0, 32).tolist()
             w = rng.normal(0.0, 1.0, 32).tolist()
-            o = rng.normal(0.0, 1.0, 32).tolist()
+            # [v3.6] occupancy blocks through the IMPORTED R_occ: uniform
+            # 24-bin multinomial histograms (symmetric null) reduced by the
+            # registered lr_asymmetry — the sim certifies the veto that runs
+            # (v3.6 sec 9 S10 note, Lane A interaction).
+            o = [R_OCC(rng.multinomial(400, [1.0 / 24.0] * 24))
+                 for _ in range(32)]
             t = VS.ladder_terminal(q, w, o, sigma, sigma)
             gb[c], ob[c], cb[c] = t["primary"], t["omega"], t["occupancy"]
             st[c] = True if force_stable else bool(rng.binomial(16, 0.5) >= 12)
         outcome, _reason, lic = VS.scout_outcome(gb, ob, cb, {}, st,
-                                                 frozenset(CELLS), frozenset(CELLS))
+                                                 frozenset(CELLS), frozenset(CELLS),
+                                                 "lr_asymmetry", "lr_asymmetry")
         outcomes[outcome] = outcomes.get(outcome, 0) + 1
         licensed += bool(lic)
     return {"outcomes": outcomes, "licensed": licensed, "n": n_reps}
