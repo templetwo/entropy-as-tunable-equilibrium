@@ -1,0 +1,28 @@
+[PASS] floor_96                     derived=0.556854 frozen=0.557000
+[PASS] floor_128                    derived=0.482250 frozen=0.482000
+[PASS] floor_64                     derived=0.682004 frozen=0.682000
+[PASS] se_16_96                     derived=0.279508 frozen=0.279500
+[PASS] se_32_96                     derived=0.216506 frozen=0.216500
+[PASS] se_8_96                      derived=0.375000 frozen=0.375000
+[PASS] se_56                        derived=0.182981 frozen=0.183000
+[PASS] kappa_16_96_1s               derived=0.066876 frozen=0.067000
+[PASS] kappa_16_96_2s               derived=-0.038778 frozen=-0.039000
+[PASS] kappa_32_96_1s               derived=0.189660 frozen=0.190000
+[PASS] kappa_32_96_2s               derived=0.115181 frozen=0.115000
+[PASS] kappa_32_128_1s              derived=0.115055 frozen=0.115000
+[PASS] green_16_96_1s               derived=1.046833 frozen=1.047000
+[FAIL] green_16_96_2s               derived=1.152487 frozen=1.153000
+[PASS] rerun_edge                   derived=0.306128 frozen=0.306000
+[PASS] kappa_56                     derived=0.250854 frozen=0.251000
+[PASS] chi2_upper_df7               derived=1.797151 frozen=1.797000
+[PASS] chi2_upper_df15              derived=1.437306 frozen=1.437000
+[PASS] chi2_upper_df31              derived=1.268005 frozen=1.268000
+[PASS] disjoint_16b_B96_1s kappa=0.0669 < t*SE=0.4900
+[PASS] disjoint_32b_B96_1s kappa=0.1897 < t*SE=0.3672
+[PASS] disjoint_32b_B96_2s kappa=0.1152 < t*SE=0.4417
+[PASS] disjoint_32b_B128_1s kappa=0.1151 < t*SE=0.3672
+theorem check 16b/B96/1s: kappa=0.0669  c*kappa=0.0961  (upper threshold strictly larger: True)
+theorem check 32b/B96/1s: kappa=0.1897  c*kappa=0.2405  (upper threshold strictly larger: True)
+theorem check 32b/B96/2s: kappa=0.1152  c*kappa=0.1460  (upper threshold strictly larger: True)
+theorem check 32b/B128/1s: kappa=0.1151  c*kappa=0.1459  (upper threshold strictly larger: True)
+ALL: FAIL
