@@ -191,7 +191,10 @@ CFG = {
         # SIGNAL -- aniso current vs horizon mismatch (Delta-tau) and drive
         # amplitude (Tc) -- not the noise. Cells stand alone; no cross-cell
         # aggregation. Each cell is compared only to its own B=64 floor.
-        "blocks": 8,
+        "blocks": 16,   # [v3.6] 8->16: finding 6 (CFG-vs-RULE drift) — the
+                        # ratified ladder's first rung (RULE["blocks_first"])
+                        # needs 16 blocks/cell; the pre-ratification value
+                        # starved it. Cross-asserted in _rule_selftest().
         "scale": 10.0,
         "cells": [
             {"label": "A",    "tx": 0.1,  "ty": 2.0, "Tc": 1.0},  # widest horizon mismatch
@@ -695,8 +698,10 @@ BANDS = ("GREEN", "AMBER", "RED", "ANOMALOUS")
 BAND_VOCAB = frozenset(BANDS + (CEILING,))
 
 RULE = {
-    "rule_version": "v3.5",
-    "ratified": "2026-07-08",
+    "rule_version": "v3.6",
+    "ratified": "2026-07-13",      # v3.6 enactment (Anthony; RATIFICATION_v3.6.md)
+    "ratified_v3_5": "2026-07-08", # the superseded rule's own ratification date
+
     # --- sec 0.1 detection floor: floor(B, sd) = Z * sd * sqrt(2/B) ---
     "Z": 3.858,                    # z_{0.995} + z_{0.90}
     "alpha": 0.05,
@@ -719,7 +724,7 @@ RULE = {
     #     against the ratified prose in _rule_selftest(). ---
     "floor_64": 0.682, "floor_96": 0.557, "floor_128": 0.482,
     "se_8_96": 0.375, "se_16_96": 0.2795, "se_32_96": 0.2165, "se_56": 0.1830,
-    "green_16_96_1s": 1.047, "green_16_96_2s": 1.153,
+    "green_16_96_1s": 1.047, "green_16_96_2s": 1.152,   # [v3.6] row 5: 1.15246 rounds 1.152 (ratified convention)
     "kappa_16_96_1s": 0.067,       # OPERATIVE frozen RED: |mu| < 0.067*sd
     "kappa_16_96_2s": -0.039,      # < 0 -> two-sided RED UNREACHABLE at 16b
     "kappa_32_96_1s": 0.190, "kappa_32_96_2s": 0.115,
@@ -766,21 +771,28 @@ def band_cell(mu_hat, sd_cell, n_blocks, B_conf, sigma_cell, stable_cell=None):
     the parameter is retained to match the ratified sec-7 interface.
 
     THE PARTITION IS COMPLETE: GREEN | ANOMALOUS | RED | AMBER, in that
-    priority. RED carries the sec-3.3 ROBUSTNESS CONJUNCTION -- it must bound
-    under BOTH the point sd AND the coupled upper-CI sd, on BOTH the aligned
-    statistic x (v3.1) AND the magnitude |mu| (v3.2 belt).
+    priority. RED is the sec-3.3 [v3.6] single MAGNITUDE conjunct:
+    |mu_hat| + t*SE(sd_hat) < floor_c(sd_hat), evaluated after the
+    GREEN/ANOMALOUS branches. The historical v3.1 aligned conjunct and the
+    v3.2/v3.3 coupled-upper (sd_upper) conjuncts are PROVEN empty and removed
+    (fork 14, ratified 2026-07-13): floor_c and rule_se are both degree-1 in
+    sd, so each upper conjunct is the point conjunct with its threshold scaled
+    by chi2_upper > 1, and the aligned conjunct is implied by the magnitude
+    conjunct (|x| <= |mu_hat| both sidednesses). Verdict-identical on 3.73M
+    probes incl. a firing positive control (laneB/sec33_inertness_probe.py);
+    pinned forever by the verdict-identity regression in _rule_selftest().
+    NOTE [v3.6]: with the coupled-upper conjuncts gone, band_cell no longer
+    consults RULE["chi2_upper"], so df is no longer restricted to that table
+    here -- _t_star() remains the frozen-df registration guard for ALL paths.
     """
     if not (sd_cell > 0):
         raise ValueError("sd_cell must be > 0 (got %r) -- data integrity" % (sd_cell,))
     df = n_blocks - 1
     two_sided = (sigma_cell is None)
     t = _t_star(df, two_sided)
-    sd_up = sd_cell * _chi2_upper_factor(df)
 
     f_c = rule_floor(sd_cell, B_conf)
-    f_u = rule_floor(sd_up, B_conf)
     se_c = rule_se(sd_cell, n_blocks)
-    se_u = rule_se(sd_up, n_blocks)
 
     x = abs(mu_hat) if two_sided else sigma_cell * mu_hat   # prediction-aligned
 
@@ -792,10 +804,8 @@ def band_cell(mu_hat, sd_cell, n_blocks, B_conf, sigma_cell, stable_cell=None):
     if (not two_sided) and (x < -t * se_c):
         return ("ANOMALOUS", x - t * se_c, f_c)
 
-    aligned = (x + t * se_c < f_c) and (x + t * se_u < f_u)          # v3.1, verbatim
-    magnitude = (abs(mu_hat) + t * se_c < f_c) and \
-                (abs(mu_hat) + t * se_u < f_u)                        # v3.2 belt
-    if aligned and magnitude:
+    # sec 3.3 [v3.6]: single magnitude conjunct (see docstring; fork 14).
+    if abs(mu_hat) + t * se_c < f_c:
         return ("RED", abs(mu_hat) + t * se_c, f_c)
 
     return ("AMBER", x + t * se_c, f_c)
@@ -874,19 +884,31 @@ def ladder_terminal(primary_blocks, omega_blocks, occupancy_blocks,
 
 def pivot_licensed(gating_bands, stable_flags, omega_bands, occupancy_bands,
                    descriptive_bands,
-                   REGISTERED_GATING_ROSTER, REGISTERED_FULL_ROSTER):
+                   REGISTERED_GATING_ROSTER, REGISTERED_FULL_ROSTER,
+                   occ_reduction_name, REGISTERED_OCC_REDUCTION):   # [v3.6]
     """sec 5: pivot to the closed no-reset NESS protocol iff ALL conditions hold.
 
     Returns (licensed: bool, reason: str). Guarded against: vacuous truth
     (all([]) is True), compute-ceiling-minted absence (primary AND omega),
     wrong-sign magnitude leak (belt + STABLE suspenders), statistic-projection
-    null (omega veto at the shared-ladder look + occupancy GREEN-veto), and
-    shrunk-denominator null on EVERY consumed dict (full-roster completeness).
+    null (omega veto at the shared-ladder look + occupancy GREEN-veto),
+    shrunk-denominator null on EVERY consumed dict (full-roster completeness),
+    and [v3.6] an occupancy veto satisfied by an UNREGISTERED estimand (the
+    sec-5(iii') back door demonstrated by Lane B, closed by fork 15).
 
-    ORDER IS THE RATIFIED PROSE ORDER: THE ANOMALY GUARD RUNS FIRST. An open
+    ORDER: the [v3.6] ESTIMAND-REGISTRATION guard runs before any band is
+    read; then THE ANOMALY GUARD, per the ratified prose order. An open
     ANOMALOUS anywhere blocks ANY terminal-null decision before a single
     all()/any() over a possibly-empty or silently-shrunken set can run.
+    A registration mismatch is a REGISTRATION-INTEGRITY FLAG, never a null.
     """
+    # ---- (0'') ESTIMAND REGISTRATION [v3.6] -- before any band is read:
+    if REGISTERED_OCC_REDUCTION is None:
+        return (False, "no registered occupancy reduction (OCC_REDUCTION_GAP)")
+    if occ_reduction_name != REGISTERED_OCC_REDUCTION:
+        return (False, "occupancy bands stamped from unregistered reduction %r"
+                       % (occ_reduction_name,))
+
     GATING = set(REGISTERED_GATING_ROSTER)
     FULL = set(REGISTERED_FULL_ROSTER)
     DEMOTED = FULL - GATING
@@ -987,9 +1009,16 @@ OCC_REDUCTION_GAP = ("occupancy_x per-block scalar reduction is NOT registered "
                      "(rule bands a scalar; harness records a 24-bin histogram)")
 
 def _occ_lr_asymmetry(hist):
-    """HQ-PROPOSED CANDIDATE, NOT RATIFIED, NOT REGISTERED. Signed left/right
-    mass asymmetry of the 24-bin occupancy histogram. Selectable ONLY via an
-    explicit --occ-reduction flag, and the choice is stamped in the report."""
+    """R_occ per fork 15, ratified by Anthony 2026-07-13 (paraphrase: honesty
+    prevails, make it real — verbatim utterance with original spacing lives in
+    RATIFICATION_v3.6.md): signed left/right mass asymmetry of the 24-bin
+    occupancy histogram — mean-zero under a symmetric null, consistent with the
+    two-sided band_cell arithmetic; BLIND to left/right-symmetric occupancy
+    shifts, and that blind spot is stated in the claim (v3.6 sec 2.1).
+    Registration BINDS via the re-issued prereg's occ_reduction field naming
+    it — this function is only *registered* when that field says so. The
+    invoked choice is still stamped in the report, and any mismatch with the
+    registered name WITHHOLDS the decision (never a null)."""
     v = np.asarray(hist, dtype=float)
     tot = v.sum()
     if tot <= 0:
@@ -1000,10 +1029,12 @@ def _occ_lr_asymmetry(hist):
 OCC_REDUCTIONS = {"lr_asymmetry": _occ_lr_asymmetry}
 
 def scout_outcome(gating_bands, omega_bands, occupancy_bands, descriptive_bands,
-                  stable_flags, GATING, FULL):
+                  stable_flags, GATING, FULL,
+                  occ_reduction_name=None, REGISTERED_OCC_REDUCTION=None):  # [v3.6]
     """sec 5: exactly ONE of the four honest terminal outcomes."""
     licensed, reason = pivot_licensed(gating_bands, stable_flags, omega_bands,
-                                      occupancy_bands, descriptive_bands, GATING, FULL)
+                                      occupancy_bands, descriptive_bands, GATING, FULL,
+                                      occ_reduction_name, REGISTERED_OCC_REDUCTION)
     if licensed:
         return ("PIVOT_ALL_RED", reason, licensed)
     anom = [c for d in (gating_bands, descriptive_bands, omega_bands)
@@ -1032,7 +1063,14 @@ def scout_report(scout_rows, opts):
     (rule sec 1.1 / sec 1.2, law #1).
     """
     p1 = json.load(open(opts["p1"])) if opts.get("p1") else None
-    occ_fn = OCC_REDUCTIONS.get(opts.get("occ_reduction") or "")
+    invoked_occ = opts.get("occ_reduction")
+    occ_fn = OCC_REDUCTIONS.get(invoked_occ or "")
+    # [v3.6] the REGISTERED reduction name comes from the re-issued prereg
+    # (--prereg path, field occ_reduction.name) -- never from the CLI choice.
+    registered_occ = None
+    if opts.get("prereg"):
+        registered_occ = (json.load(open(opts["prereg"]))
+                          .get("occ_reduction") or {}).get("name")
     cells = {}
     for d in scout_rows:
         cells.setdefault(d["cell"], []).append(d)
@@ -1045,6 +1083,17 @@ def scout_report(scout_rows, opts):
                         "STABLE and the registered rosters are unregistered")
     if occ_fn is None:
         withheld.append(OCC_REDUCTION_GAP)
+    # [v3.6] withhold-on-mismatch (fork 15): the decision is WITHHELD unless
+    # the invoked reduction IS the registered one. A mismatch is a
+    # registration-integrity flag, never a null.
+    if registered_occ is None:
+        withheld.append("no registered occupancy reduction: the re-issued "
+                        "prereg's occ_reduction field was not supplied "
+                        "(--prereg) or does not name one")
+    elif invoked_occ != registered_occ:
+        withheld.append("invoked occupancy reduction %r != registered %r "
+                        "(registration-integrity flag)"
+                        % (invoked_occ, registered_occ))
     for label in sorted(cells):
         blocks = sorted(cells[label], key=lambda r: r["block"])
         q = [b["quad_loop_rate"] for b in blocks]
@@ -1063,7 +1112,8 @@ def scout_report(scout_rows, opts):
         cb = {c: rep["cells"][c]["occupancy"] for c in FULL}
         db = {c: rep["cells"][c]["primary"] for c in (FULL - GATING)}
         st = {c: bool(p1[c].get("stable")) for c in GATING}
-        outcome, reason, lic = scout_outcome(gb, ob, cb, db, st, GATING, FULL)
+        outcome, reason, lic = scout_outcome(gb, ob, cb, db, st, GATING, FULL,
+                                             invoked_occ, registered_occ)
         # EVERY blocking condition is reported, not just the first one hit --
         # an operator must never read a single short-circuit reason as if it
         # were the only thing standing between the run and a pivot.
@@ -1086,7 +1136,8 @@ def scout_report(scout_rows, opts):
         rep["decision"] = {"emitted": True, "outcome": outcome,
                            "pivot_licensed": lic, "first_blocking_reason": reason,
                            "flags": {k: v for k, v in flags.items() if v},
-                           "occ_reduction": opts.get("occ_reduction")}
+                           "occ_reduction": invoked_occ,
+                           "occ_reduction_registered": registered_occ}  # [v3.6]
     print(json.dumps(rep, indent=1))
     return rep
 
@@ -1096,6 +1147,8 @@ def _scout_opts(args):
         o["p1"] = args[args.index("--p1") + 1]
     if "--occ-reduction" in args:
         o["occ_reduction"] = args[args.index("--occ-reduction") + 1]
+    if "--prereg" in args:                                   # [v3.6] fork 15
+        o["prereg"] = args[args.index("--prereg") + 1]
     return o
 
 def analyze(args):
@@ -1389,12 +1442,28 @@ def _rule_selftest():
     R = RULE
     ALL = frozenset(["A", "B", "C", "D", "AxT2", "AxT4"])
     GAT = ALL                     # no-demotion case
-    def lic(gb, st=None, ob=None, cb=None, db=None, G=GAT, F=ALL):
+    def lic(gb, st=None, ob=None, cb=None, db=None, G=GAT, F=ALL,
+            occ="lr_asymmetry", reg="lr_asymmetry"):
         st = {c: True for c in G} if st is None else st
         ob = {c: "RED" for c in F} if ob is None else ob
         cb = {c: "AMBER" for c in F} if cb is None else cb
         db = {} if db is None else db
-        return pivot_licensed(gb, st, ob, cb, db, G, F)[0]
+        return pivot_licensed(gb, st, ob, cb, db, G, F, occ, reg)[0]
+
+    print("# --- [v3.6] estimand registration (sec 5 (0''), fork 15) CAN FAIL ---")
+    check("pivot-compatible bands + NO registered reduction -> withheld",
+          lic({c: "RED" for c in GAT}, reg=None), False)
+    check("invoked reduction != registered -> registration-integrity flag",
+          lic({c: "RED" for c in GAT}, occ="chi2_uniformity"), False)
+    check("unregistered-reduction reason names the invoked estimand",
+          "unregistered reduction" in pivot_licensed(
+              {c: "RED" for c in GAT}, {c: True for c in GAT},
+              {c: "RED" for c in ALL}, {c: "AMBER" for c in ALL}, {},
+              GAT, ALL, "chi2_uniformity", "lr_asymmetry")[1], True)
+
+    print("# --- [v3.6] finding-6 cross-assert: config vs rule drift ---")
+    check("CFG.scout.blocks == RULE.blocks_first",
+          CFG["scout"]["blocks"] == R["blocks_first"], True)
 
     print("# --- pivot_licensed() CAN FAIL (law #2) ---")
     check("empty band set (vacuous truth, all([])==True)",
@@ -1518,9 +1587,52 @@ def _rule_selftest():
           ladder_terminal(amber[:16], amber[:16], None, +1, +1)["status"],
           "EXTENSION_REQUIRED")
 
+    print("# --- [v3.6] verdict-identity regression: simplified sec 3.3 == v3.5 arithmetic ---")
+    # The fork-14 removal is pinned as behavior-preserving HERE, forever: the
+    # full v3.5 four-conjunct arithmetic (incl. the coupled-upper sd clauses)
+    # is reconstructed from the frozen tables and swept against the live
+    # band_cell on a seeded grid plus float-boundary-hugging probes at every
+    # cutpoint of BOTH arithmetics. Expected differences: exactly 0.
+    def _band_v35_reference(mu, sd, n, B, sig):
+        df = n - 1
+        two = sig is None
+        t = (R["t_two_sided"] if two else R["t_one_sided"])[df]
+        up = R["chi2_upper"][df]
+        f_c, f_u = rule_floor(sd, B), rule_floor(sd * up, B)
+        se_c, se_u = rule_se(sd, n), rule_se(sd * up, n)
+        x = abs(mu) if two else sig * mu
+        if x - t * se_c > f_c:
+            return "GREEN"
+        if (not two) and (x < -t * se_c):
+            return "ANOMALOUS"
+        aligned = (x + t * se_c < f_c) and (x + t * se_u < f_u)
+        magnitude = (abs(mu) + t * se_c < f_c) and (abs(mu) + t * se_u < f_u)
+        if aligned and magnitude:
+            return "RED"
+        return "AMBER"
+    vrng = np.random.default_rng(20260713)
+    vdiffs, vprobes = 0, 0
+    for (vn, vB) in ((16, 96), (32, 96), (32, 128)):
+        for vsig in (+1, -1, None):
+            vt = (R["t_two_sided"] if vsig is None else R["t_one_sided"])[vn - 1]
+            vup = R["chi2_upper"][vn - 1]
+            for vsd in (0.5, 1.0, 2.0):
+                vse, vfl = rule_se(vsd, vn), rule_floor(vsd, vB)
+                vmus = list(vrng.uniform(-2.5 * vfl, 2.5 * vfl, 4000))
+                for c0 in (vfl + vt * vse, vt * vse, vfl - vt * vse,
+                           (vfl - vt * vse) * vup):
+                    for veps in (-1e-9, 0.0, 1e-9):
+                        vmus += [c0 + veps, -(c0 + veps)]
+                for vmu in vmus:
+                    vprobes += 1
+                    if band_cell(float(vmu), vsd, vn, vB, vsig)[0] != \
+                            _band_v35_reference(float(vmu), vsd, vn, vB, vsig):
+                        vdiffs += 1
+    check("verdict identity on frozen sweep (%d probes)" % vprobes, vdiffs, 0)
+
     print("# --- LAW #4: every prose threshold grepped against the frozen config ---")
     doc = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                       "v44_scout_DECISION_RULE_v3.5.md")
+                       "v44_scout_DECISION_RULE_%s.md" % RULE["rule_version"])
     src = open(doc).read() if os.path.exists(doc) else None
     if src is None:
         print("#   [WARN] ratified doc not found next to the harness; grep skipped")
