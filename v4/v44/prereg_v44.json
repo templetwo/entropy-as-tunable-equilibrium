@@ -1,8 +1,13 @@
 {
   "type": "preregistration",
-  "source_sha_at_registration": "0b65a9ee92b9fe2c",
+  "source_sha_at_registration": "bce6b73843519829",
   "version": "v4h-1.4.0",
-  "config_hash": "a344d6c47c8a22c1",
+  "rule_version": "v3.6",
+  "rule_ratified": {
+    "v3_6": "2026-07-13",
+    "v3_5": "2026-07-08"
+  },
+  "config_hash": "ba7c854ebc825476",
   "config": {
     "version": "v4h-1.4.0",
     "box": {
@@ -163,7 +168,7 @@
       "cells": 6
     },
     "scout": {
-      "blocks": 8,
+      "blocks": 16,
       "scale": 10.0,
       "cells": [
         {
@@ -607,5 +612,15 @@
     "G4 G1 fail -> inconclusive on G2, instrument redesign",
     "OCC powered occupancy re-test at B=32 (confirmatory re-test of v4.2 p=0.048, not a fork gate)",
     "SCOPE: any G2 pass = coherent circulation in the reset-defined transport protocol; NOT a stationary closed-system NESS claim (v4.4+ lineage)"
+  ],
+  "occ_reduction": {
+    "name": "lr_asymmetry",
+    "formula": "R_occ(v) = (sum_{i=12..23} v_i - sum_{i=0..11} v_i) / sum_{i=0..23} v_i over the 24-bin occupancy_x histogram; signed left/right mass asymmetry, mean-zero under a symmetric null. BLIND to left/right-symmetric shape change - stated in the v3.6 sec-2.1 claim wording, not papered over.",
+    "ratified": "fork 15, Anthony 2026-07-13 (RATIFICATION_v3.6.md)"
+  },
+  "provenance_notes": [
+    "DIAG-3 (diag3_raw.ndjson) ran under source_sha 0b65a9ee92b9fe2c (pre-executability harness). The executability change (7f2e91f->7a02eb5) is verified additive (+681/-3, all three deletions inspected: import cosmetics + selftest wiring); physics paths untouched.",
+    "Certification of v3.5-as-executable AND v3.6 (verdict-identical): gate9 compound 0.98114 >= 0.90, byte-reproducible NDJSON b44948bbd00161aed8256957740300d49ea887d2dda1906886b14d936b00d826 under source_sha bce6b73843519829 (oc_sim_v36_exec, imported band_cell/ladder_terminal/scout_outcome/R_occ only).",
+    "Prior prereg (source_sha_at_registration 0b65a9ee92b9fe2c, sha256 b7c5aeb6bd21b70036f7fb6841f199fbf923aa984cba3d30a71943c75e9a2a2b) superseded by this re-issue; retained in git history."
   ]
 }
